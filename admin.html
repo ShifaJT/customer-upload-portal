@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Admin Dashboard</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f0f2f5;
@@ -27,14 +23,8 @@
             text-align: center;
             margin-bottom: 20px;
         }
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 8px;
-        }
-        .header p {
-            opacity: 0.9;
-            font-size: 14px;
-        }
+        .header h1 { font-size: 28px; margin-bottom: 8px; }
+        .header p { opacity: 0.9; font-size: 14px; }
         .card {
             background: white;
             border-radius: 12px;
@@ -51,27 +41,12 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-        .btn-danger {
-            background: #fc8181;
-            color: white;
-        }
-        .btn-danger:hover {
-            background: #f56565;
-        }
-        .btn-success {
-            background: #48bb78;
-            color: white;
-        }
-        .btn-success:hover {
-            background: #38a169;
-        }
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        .btn-primary:hover {
-            background: #5a67d8;
-        }
+        .btn-danger { background: #fc8181; color: white; }
+        .btn-danger:hover { background: #f56565; }
+        .btn-success { background: #48bb78; color: white; }
+        .btn-success:hover { background: #38a169; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5a67d8; }
         .admin-login {
             max-width: 400px;
             margin: 40px auto;
@@ -227,6 +202,22 @@
         .download-all:hover {
             background: #38a169;
         }
+        .sync-status {
+            background: #ebf8ff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            border: 1px solid #bee3f8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .sync-status .status-text {
+            color: #2b6cb0;
+        }
         .toast {
             position: fixed;
             top: 20px;
@@ -239,18 +230,10 @@
             z-index: 9999;
             animation: slideIn 0.3s;
         }
-        .toast.error {
-            background: #fc8181;
-        }
+        .toast.error { background: #fc8181; }
         @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
         .lightbox {
             display: none;
@@ -265,9 +248,7 @@
             align-items: center;
             cursor: pointer;
         }
-        .lightbox.active {
-            display: flex;
-        }
+        .lightbox.active { display: flex; }
         .lightbox img {
             max-width: 90%;
             max-height: 90%;
@@ -282,9 +263,7 @@
             font-weight: bold;
             cursor: pointer;
         }
-        .lightbox .close:hover {
-            color: #fc8181;
-        }
+        .lightbox .close:hover { color: #fc8181; }
         .admin-actions {
             display: flex;
             gap: 10px;
@@ -296,10 +275,18 @@
             padding: 8px 16px;
             font-size: 14px;
         }
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .refresh-btn:hover { background: #5a67d8; }
         @media (max-width: 600px) {
-            .header h1 {
-                font-size: 22px;
-            }
+            .header h1 { font-size: 22px; }
             .upload-item .file-preview {
                 width: 90px;
             }
@@ -313,13 +300,11 @@
 <body>
     <div class="container">
 
-        <!-- LIGHTBOX -->
         <div class="lightbox" id="lightbox" onclick="closeLightbox()">
             <span class="close">&times;</span>
             <img id="lightboxImg" src="" alt="Preview" />
         </div>
 
-        <!-- ADMIN LOGIN -->
         <div id="loginScreen">
             <div class="header">
                 <h1>🔐 Admin Dashboard</h1>
@@ -332,7 +317,6 @@
             </div>
         </div>
 
-        <!-- ADMIN DASHBOARD -->
         <div id="dashboardScreen" style="display:none;">
             <div class="header">
                 <h1>📋 Admin Dashboard</h1>
@@ -343,9 +327,15 @@
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:20px;">
                     <h3>All Uploads</h3>
                     <div class="admin-actions">
+                        <button class="refresh-btn" onclick="loadUploads()">🔄 Refresh</button>
                         <button class="download-all" onclick="downloadAllFiles()">📥 Download All</button>
                         <button class="btn btn-danger" onclick="adminLogout()" style="width:auto; padding:8px 20px;">🚪 Logout</button>
                     </div>
+                </div>
+
+                <div class="sync-status">
+                    <span class="status-text">💾 Data is stored in GitHub repository (shared across all admins)</span>
+                    <span id="uploadCount" style="font-weight:600; color:#667eea;"></span>
                 </div>
 
                 <div class="stats" id="statsContainer"></div>
@@ -362,19 +352,22 @@
 
     <script>
         // ============================================================
-        //  🔐 CONFIGURATION - CHANGE YOUR PASSWORD HERE!
+        //  🔐 CONFIGURATION - EDIT THESE TWO LINES ONLY!
         // ============================================================
         const ADMIN_PASSWORD = 'admin123';  // ← CHANGE THIS PASSWORD!
+        const GITHUB_TOKEN = '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';  // ← Get from https://github.com/settings/tokens (No Expiration!)
+        
+        // ============================================================
+        //  GITHUB SETTINGS (Don't change these)
+        // ============================================================
+        const GITHUB_OWNER = 'shifajt';
+        const GITHUB_REPO = 'customer-upload-portal';
+        const GITHUB_BRANCH = 'main';
 
-        // ============================================================
-        //  APP STATE
-        // ============================================================
         let allUploads = [];
         let isAdmin = false;
+        let currentSha = null;
 
-        // ============================================================
-        //  AUTH FUNCTIONS
-        // ============================================================
         function adminLogin() {
             const pwd = document.getElementById('adminPassword').value;
             if (pwd === ADMIN_PASSWORD) {
@@ -395,14 +388,9 @@
             document.getElementById('adminPassword').value = '';
         }
 
-        // ============================================================
-        //  LIGHTBOX FUNCTIONS
-        // ============================================================
         function openLightbox(imageUrl) {
-            const lightbox = document.getElementById('lightbox');
-            const img = document.getElementById('lightboxImg');
-            img.src = imageUrl;
-            lightbox.classList.add('active');
+            document.getElementById('lightboxImg').src = imageUrl;
+            document.getElementById('lightbox').classList.add('active');
         }
 
         function closeLightbox() {
@@ -410,40 +398,52 @@
         }
 
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeLightbox();
-            }
+            if (e.key === 'Escape') closeLightbox();
         });
 
-        // ============================================================
-        //  STORAGE FUNCTIONS
-        // ============================================================
-        function loadUploads() {
+        async function loadFromGitHub() {
             try {
-                const data = localStorage.getItem('uploads');
-                allUploads = data ? JSON.parse(data) : [];
-                renderAdminView();
-                return allUploads;
+                const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/uploads.json`;
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const content = atob(data.content);
+                    return {
+                        data: JSON.parse(content),
+                        sha: data.sha
+                    };
+                } else if (response.status === 404) {
+                    return { data: [], sha: null };
+                } else {
+                    throw new Error('Failed to load');
+                }
             } catch (e) {
-                allUploads = [];
-                renderAdminView();
-                return allUploads;
+                console.error('Load error:', e);
+                const localData = localStorage.getItem('uploads');
+                return { data: localData ? JSON.parse(localData) : [], sha: null };
             }
         }
 
-        function saveUploads(data) {
+        async function loadUploads() {
             try {
-                localStorage.setItem('uploads', JSON.stringify(data));
-                return true;
+                const { data, sha } = await loadFromGitHub();
+                allUploads = data;
+                currentSha = sha;
+                renderAdminView();
+                document.getElementById('uploadCount').textContent = `${allUploads.length} uploads`;
+                return allUploads;
             } catch (e) {
-                showToast('Error saving data: ' + e.message, 'error');
-                return false;
+                showToast('Error loading data: ' + e.message, 'error');
+                return [];
             }
         }
 
-        // ============================================================
-        //  ADMIN VIEW
-        // ============================================================
         function renderAdminView() {
             const filter = document.getElementById('filterMobile').value.trim().toLowerCase();
             let filtered = allUploads;
@@ -455,9 +455,11 @@
             const pending = allUploads.filter(u => !u.viewed).length;
             const viewed = allUploads.filter(u => u.viewed).length;
             document.getElementById('statsContainer').innerHTML = `
-                <div class="stat-card"><div class="number">${total}</div><div class="label">Total</div></div>
-                <div class="stat-card"><div class="number">${pending}</div><div class="label">Pending</div></div>
-                <div class="stat-card"><div class="number">${viewed}</div><div class="label">Viewed</div></div>
+                <div class="stats">
+                    <div class="stat-card"><div class="number">${total}</div><div class="label">Total</div></div>
+                    <div class="stat-card"><div class="number">${pending}</div><div class="label">Pending</div></div>
+                    <div class="stat-card"><div class="number">${viewed}</div><div class="label">Viewed</div></div>
+                </div>
             `;
 
             const container = document.getElementById('uploadsList');
@@ -467,43 +469,24 @@
             }
 
             container.innerHTML = filtered.map((u, index) => {
-                const filesHtml = u.files.map((f, i) => {
+                const filesHtml = u.files.map((f) => {
                     const isImage = f.type && f.type.startsWith('image/');
-                    
-                    let imageSrc = null;
-                    if (f.cloud && f.url) {
-                        imageSrc = f.url;
-                    } else if (f.display_url) {
-                        imageSrc = f.display_url;
-                    } else if (f.data) {
-                        imageSrc = f.data;
-                    } else if (f.url) {
-                        imageSrc = f.url;
-                    }
+                    const imageSrc = f.url || f.data || '';
                     
                     if (isImage && imageSrc) {
                         return `
                             <div class="file-preview" onclick="openLightbox('${imageSrc}')">
-                                <img src="${imageSrc}" alt="${f.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23f0f2f5%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2230%22%3E🖼️%3C/text%3E%3C/svg%3E'" />
+                                <img src="${imageSrc}" alt="${f.name}" 
+                                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23f0f2f5%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2230%22%3E🖼️%3C/text%3E%3C/svg%3E'" />
                                 <div class="file-name">${f.name}</div>
                                 <div class="file-size">${(f.size/1024).toFixed(1)} KB</div>
                                 ${f.cloud ? '<div class="cloud-badge">☁️</div>' : ''}
                             </div>
                         `;
-                    } else if (f.type && f.type.startsWith('video/')) {
-                        const src = f.url || f.data || '';
-                        return `
-                            <div class="file-preview" onclick="window.open('${src}', '_blank')">
-                                <div class="file-icon">🎬</div>
-                                <div class="file-name">${f.name}</div>
-                                <div class="file-size">${(f.size/1024).toFixed(1)} KB</div>
-                            </div>
-                        `;
                     } else {
                         const icon = f.name && f.name.endsWith('.pdf') ? '📄' : '📝';
-                        const src = f.url || f.data || '';
                         return `
-                            <div class="file-preview" onclick="window.open('${src}', '_blank')">
+                            <div class="file-preview" onclick="window.open('${imageSrc}', '_blank')">
                                 <div class="file-icon">${icon}</div>
                                 <div class="file-name">${f.name || 'File'}</div>
                                 <div class="file-size">${(f.size/1024).toFixed(1)} KB</div>
@@ -515,7 +498,6 @@
                 const locationHtml = u.location ? 
                     `📍 ${u.location.lat.toFixed(4)}, ${u.location.lng.toFixed(4)}` : 
                     '📍 Not shared';
-
                 const badgeClass = u.viewed ? 'badge-viewed' : 'badge-pending';
                 const badgeText = u.viewed ? '✅ Viewed' : '⏳ Pending';
 
@@ -541,7 +523,7 @@
             const upload = allUploads.find(u => u.id === id);
             if (upload) {
                 upload.viewed = true;
-                saveUploads(allUploads);
+                localStorage.setItem('uploads', JSON.stringify(allUploads));
                 renderAdminView();
                 showToast('✅ Marked as viewed');
             }
@@ -550,7 +532,7 @@
         function deleteUpload(id) {
             if (!confirm('Delete this upload?')) return;
             allUploads = allUploads.filter(u => u.id !== id);
-            saveUploads(allUploads);
+            localStorage.setItem('uploads', JSON.stringify(allUploads));
             renderAdminView();
             showToast('🗑️ Deleted');
         }
@@ -581,7 +563,6 @@
             link.download = `uploads_${new Date().toISOString().slice(0,10)}.txt`;
             link.click();
             URL.revokeObjectURL(link.href);
-            
             showToast('📥 Download started!');
         }
 
@@ -593,11 +574,11 @@
             setTimeout(() => toast.remove(), 4000);
         }
 
-        // ============================================================
-        //  INIT
-        // ============================================================
         window.onload = function() {
             console.log('🔐 Admin Dashboard loaded!');
+            if (!GITHUB_TOKEN || GITHUB_TOKEN === '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') {
+                console.warn('⚠️ Please set your GitHub token!');
+            }
         };
     </script>
 </body>
