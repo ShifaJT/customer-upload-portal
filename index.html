@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Customer Upload Portal</title>
+    <style>
+        /* ====== STYLING ====== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            padding: 16px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: none;
+            font-weight: 600;
+            color: #718096;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+        }
+        .tab-btn:hover:not(.active) {
+            background: #edf2f7;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #2d3748;
+            font-size: 14px;
+        }
+        .form-group input[type="tel"],
+        .form-group input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .file-drop {
+            border: 2px dashed #e2e8f0;
+            padding: 40px 20px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .file-drop:hover {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+        .file-drop input {
+            display: none;
+        }
+        .file-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .file-tag {
+            background: #edf2f7;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .file-tag .remove {
+            color: #fc8181;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+        }
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+        .btn-danger {
+            background: #fc8181;
+            color: white;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+            width: auto;
+        }
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+        .location-btn {
+            background: #48bb78;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .location-btn:hover {
+            background: #38a169;
+        }
+        .upload-item {
+            border-left: 4px solid #667eea;
+            padding: 16px;
+            margin-bottom: 14px;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+        .upload-item .meta {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .upload-item .mobile {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .upload-item .time {
+            color: #718096;
+            font-size: 13px;
+        }
+        .upload-item .files {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 8px 0;
+        }
+        .upload-item .file-link {
+            background: white;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            border: 1px solid #e2e8f0;
+            text-decoration: none;
+            color: #4a5568;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .upload-item .file-link:hover {
+            background: #667eea;
+            color: white;
+        }
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-pending {
+            background: #fefcbf;
+            color: #975a16;
+        }
+        .badge-viewed {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        .admin-login {
+            max-width: 400px;
+            margin: 40px auto;
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 14px 24px;
+            background: #48bb78;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 9999;
+            animation: slideIn 0.3s;
+        }
+        .toast.error {
+            background: #fc8181;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        .filter-box {
+            margin: 15px 0;
+        }
+        .filter-box input {
+            width: 100%;
+            max-width: 300px;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #f7fafc;
+            padding: 14px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-card .number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-card .label {
+            font-size: 12px;
+            color: #718096;
+        }
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 22px;
+            }
+            .tabs {
+                flex-direction: column;
+            }
+            .tab-btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+
+        <!-- ====== HEADER ====== -->
+        <div class="header">
+            <h1>📤 Customer Upload Portal</h1>
+            <p>Upload images, videos, documents with location</p>
+        </div>
+
+        <!-- ====== TABS ====== -->
+        <div class="card">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('customer')">📱 Customer</button>
+                <button class="tab-btn" onclick="switchTab('admin')">🔐 Admin</button>
+            </div>
+        </div>
+
+        <!-- ====== CUSTOMER TAB ====== -->
+        <div id="customerTab">
+            <div class="card">
+                <form id="uploadForm" onsubmit="handleSubmit(event)">
+                    <!-- Mobile -->
+                    <div class="form-group">
+                        <label>📱 Mobile Number *</label>
+                        <input type="tel" id="mobile" placeholder="Enter 10-digit mobile number" 
+                               pattern="[0-9]{10}" required />
+                    </div>
+
+                    <!-- Files -->
+                    <div class="form-group">
+                        <label>📎 Upload Files *</label>
+                        <div class="file-drop" onclick="document.getElementById('fileInput').click()">
+                            <div style="font-size: 40px;">📁</div>
+                            <div style="font-weight: 500;">Click to select files</div>
+                            <div style="font-size: 13px; color: #718096; margin-top: 6px;">
+                                Images, Videos, PDF, Word (Max 25MB each)
+                            </div>
+                            <input type="file" id="fileInput" multiple 
+                                   accept="image/*,video/*,.pdf,.doc,.docx" 
+                                   onchange="handleFiles(this.files)" />
+                        </div>
+                        <div id="fileList" class="file-list"></div>
+                    </div>
+
+                    <!-- Location -->
+                    <div class="form-group">
+                        <label>📍 Location (Optional)</label>
+                        <button type="button" class="location-btn" onclick="getLocation()">
+                            📍 Share My Location
+                        </button>
+                        <div id="locationDisplay" style="margin-top: 8px; font-size: 14px; color: #4a5568;"></div>
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        🚀 Submit
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ====== ADMIN TAB ====== -->
+        <div id="adminTab" style="display:none;">
+            <div class="card">
+                <!-- Login -->
+                <div id="adminLogin">
+                    <div style="max-width: 400px; margin: 0 auto;">
+                        <h3 style="text-align:center; margin-bottom:20px;">🔐 Admin Login</h3>
+                        <div class="form-group">
+                            <input type="password" id="adminPassword" placeholder="Enter admin password" 
+                                   style="width:100%; padding:12px; border:2px solid #e2e8f0; border-radius:8px;" />
+                        </div>
+                        <button class="btn btn-primary" onclick="adminLogin()">Login</button>
+                    </div>
+                </div>
+
+                <!-- Dashboard -->
+                <div id="adminDashboard" style="display:none;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:20px;">
+                        <h3>📋 All Uploads</h3>
+                        <button class="btn btn-danger" onclick="adminLogout()" style="width:auto; padding:8px 20px;">Logout</button>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="stats" id="statsContainer"></div>
+
+                    <!-- Filter -->
+                    <div class="filter-box">
+                        <input type="text" id="filterMobile" placeholder="🔍 Filter by mobile number..." 
+                               oninput="renderAdminView()" />
+                    </div>
+
+                    <!-- Uploads List -->
+                    <div id="uploadsList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  CONFIGURATION - EDIT THESE!
+        // ============================================================
+        const CONFIG = {
+            // Your GitHub username
+            owner: 'YOUR_USERNAME',
+            // Your repository name
+            repo: 'customer-upload-portal',
+            // Branch name (usually 'main' or 'master')
+            branch: 'main',
+            // Admin password - CHANGE THIS!
+            adminPassword: 'admin123'
+        };
+
+        // ============================================================
+        //  APP STATE
+        // ============================================================
+        let selectedFiles = [];
+        let userLocation = null;
+        let allUploads = [];
+        let isAdmin = false;
+
+        // ============================================================
+        //  UI FUNCTIONS
+        // ============================================================
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            if (tab === 'customer') {
+                document.getElementById('customerTab').style.display = 'block';
+                document.getElementById('adminTab').style.display = 'none';
+                document.querySelector('.tab-btn:first-child').classList.add('active');
+            } else {
+                document.getElementById('customerTab').style.display = 'none';
+                document.getElementById('adminTab').style.display = 'block';
+                document.querySelector('.tab-btn:last-child').classList.add('active');
+                // Auto-login if already authenticated
+                if (isAdmin) {
+                    document.getElementById('adminLogin').style.display = 'none';
+                    document.getElementById('adminDashboard').style.display = 'block';
+                    loadUploads();
+                }
+            }
+        }
+
+        function handleFiles(files) {
+            const validFiles = [];
+            for (let f of files) {
+                const isValidType = f.type.startsWith('image/') || 
+                                   f.type.startsWith('video/') || 
+                                   f.name.endsWith('.pdf') || 
+                                   f.name.endsWith('.doc') || 
+                                   f.name.endsWith('.docx');
+                const isValidSize = f.size <= 25 * 1024 * 1024;
+                if (isValidType && isValidSize) {
+                    validFiles.push(f);
+                }
+            }
+            if (validFiles.length !== files.length) {
+                showToast('Some files were skipped. Only images, videos, PDFs, and Word docs under 25MB allowed.', 'error');
+            }
+            selectedFiles = [...selectedFiles, ...validFiles];
+            renderFileList();
+        }
+
+        function renderFileList() {
+            const container = document.getElementById('fileList');
+            if (selectedFiles.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            container.innerHTML = selectedFiles.map((f, i) => `
+                <span class="file-tag">
+                    📎 ${f.name} (${(f.size/1024).toFixed(1)} KB)
+                    <span class="remove" onclick="removeFile(${i})">✕</span>
+                </span>
+            `).join('');
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            renderFileList();
+        }
+
+        function getLocation() {
+            if (!navigator.geolocation) {
+                showToast('Geolocation not supported', 'error');
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    userLocation = {
+                        lat: pos.coords.latitude,
+                        lng: pos.coords.longitude
+                    };
+                    document.getElementById('locationDisplay').innerHTML = 
+                        `✅ Location: ${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}`;
+                },
+                () => {
+                    showToast('Unable to get location. Please enable location services.', 'error');
+                }
+            );
+        }
+
+        function showToast(msg, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+        }
+
+        // ============================================================
+        //  STORAGE FUNCTIONS (GitHub API)
+        // ============================================================
+        function getDataURL() {
+            return `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/uploads.json`;
+        }
+
+        async function loadUploads() {
+            try {
+                const res = await fetch(`https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/uploads.json`);
+                if (!res.ok) {
+                    allUploads = [];
+                } else {
+                    allUploads = await res.json();
+                }
+                renderAdminView();
+                return allUploads;
+            } catch (e) {
+                // If GitHub fails, try localStorage
+                const local = localStorage.getItem('uploads');
+                allUploads = local ? JSON.parse(local) : [];
+                renderAdminView();
+                return allUploads;
+            }
+        }
+
+        async function saveUploads(data) {
+            try {
+                // Get current file SHA if exists
+                let sha = null;
+                try {
+                    const check = await fetch(getDataURL(), {
+                        headers: { 'Accept': 'application/vnd.github.v3+json' }
+                    });
+                    if (check.ok) {
+                        const info = await check.json();
+                        sha = info.sha;
+                    }
+                } catch (e) {}
+
+                const body = {
+                    message: 'Update uploads',
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))),
+                    branch: CONFIG.branch
+                };
+                if (sha) body.sha = sha;
+
+                const res = await fetch(getDataURL(), {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (!res.ok) throw new Error('GitHub API error');
+                
+                // Also save to localStorage as backup
+                localStorage.setItem('uploads', JSON.stringify(data));
+                return true;
+            } catch (e) {
+                console.error('Save error:', e);
+                // Fallback to localStorage
+                localStorage.setItem('uploads', JSON.stringify(data));
+                showToast('Saved locally (offline mode)', 'error');
+                return true;
+            }
+        }
+
+        // ============================================================
+        //  SUBMIT HANDLER
+        // ============================================================
+        async function handleSubmit(e) {
+            e.preventDefault();
+
+            const mobile = document.getElementById('mobile').value.trim();
+            if (!mobile || mobile.length !== 10) {
+                showToast('Please enter a valid 10-digit mobile number', 'error');
+                return;
+            }
+            if (selectedFiles.length === 0) {
+                showToast('Please select at least one file', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Uploading...';
+
+            try {
+                // Read files as base64 for storage
+                const fileData = await Promise.all(selectedFiles.map(f => {
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            resolve({
+                                name: f.name,
+                                type: f.type,
+                                size: f.size,
+                                data: e.target.result.split(',')[1] // base64
+                            });
+                        };
+                        reader.readAsDataURL(f);
+                    });
+                }));
+
+                const upload = {
+                    id: Date.now().toString(),
+                    mobile: mobile,
+                    files: fileData,
+                    location: userLocation,
+                    timestamp: new Date().toISOString(),
+                    viewed: false
+                };
+
+                // Load existing, add new, save
+                const existing = await loadUploads();
+                existing.unshift(upload);
+                await saveUploads(existing);
+
+                // Reset form
+                selectedFiles = [];
+                userLocation = null;
+                document.getElementById('mobile').value = '';
+                document.getElementById('fileList').innerHTML = '';
+                document.getElementById('locationDisplay').innerHTML = '';
+                document.getElementById('fileInput').value = '';
+
+                showToast('✅ Upload successful!');
+            } catch (err) {
+                console.error(err);
+                showToast('Upload failed. Please try again.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🚀 Submit';
+            }
+        }
+
+        // ============================================================
+        //  ADMIN FUNCTIONS
+        // ============================================================
+        function adminLogin() {
+            const pwd = document.getElementById('adminPassword').value;
+            if (pwd === CONFIG.adminPassword) {
+                isAdmin = true;
+                document.getElementById('adminLogin').style.display = 'none';
+                document.getElementById('adminDashboard').style.display = 'block';
+                loadUploads();
+            } else {
+                showToast('Wrong password!', 'error');
+            }
+        }
+
+        function adminLogout() {
+            isAdmin = false;
+            document.getElementById('adminLogin').style.display = 'block';
+            document.getElementById('adminDashboard').style.display = 'none';
+            document.getElementById('adminPassword').value = '';
+        }
+
+        function renderAdminView() {
+            const filter = document.getElementById('filterMobile').value.trim().toLowerCase();
+            let filtered = allUploads;
+            if (filter) {
+                filtered = allUploads.filter(u => u.mobile.includes(filter));
+            }
+
+            // Stats
+            const total = allUploads.length;
+            const pending = allUploads.filter(u => !u.viewed).length;
+            const viewed = allUploads.filter(u => u.viewed).length;
+            document.getElementById('statsContainer').innerHTML = `
+                <div class="stat-card"><div class="number">${total}</div><div class="label">Total</div></div>
+                <div class="stat-card"><div class="number">${pending}</div><div class="label">Pending</div></div>
+                <div class="stat-card"><div class="number">${viewed}</div><div class="label">Viewed</div></div>
+            `;
+
+            // List
+            const container = document.getElementById('uploadsList');
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="empty-state">📭 No uploads found</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map((u, index) => {
+                const filesHtml = u.files.map(f => `
+                    <a href="data:${f.type};base64,${f.data}" download="${f.name}" class="file-link">
+                        📎 ${f.name}
+                    </a>
+                `).join('');
+
+                const locationHtml = u.location ? 
+                    `📍 ${u.location.lat.toFixed(4)}, ${u.location.lng.toFixed(4)}` : 
+                    '📍 Not shared';
+
+                const badgeClass = u.viewed ? 'badge-viewed' : 'badge-pending';
+                const badgeText = u.viewed ? '✅ Viewed' : '⏳ Pending';
+
+                return `
+                    <div class="upload-item">
+                        <div class="meta">
+                            <span class="mobile">📱 ${u.mobile}</span>
+                            <span class="time">${new Date(u.timestamp).toLocaleString()}</span>
+                            <span class="badge ${badgeClass}">${badgeText}</span>
+                        </div>
+                        <div style="font-size:13px; color:#4a5568;">${locationHtml}</div>
+                        <div class="files">${filesHtml}</div>
+                        <div style="margin-top:8px;">
+                            ${!u.viewed ? `<button class="btn btn-success" style="width:auto; padding:6px 16px; font-size:13px;" onclick="markViewed('${u.id}')">✅ Mark as Viewed</button>` : ''}
+                            <button class="btn btn-danger" style="width:auto; padding:6px 16px; font-size:13px; margin-left:6px;" onclick="deleteUpload('${u.id}')">🗑️ Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function markViewed(id) {
+            const upload = allUploads.find(u => u.id === id);
+            if (upload) {
+                upload.viewed = true;
+                await saveUploads(allUploads);
+                renderAdminView();
+                showToast('Marked as viewed');
+            }
+        }
+
+        async function deleteUpload(id) {
+            if (!confirm('Delete this upload?')) return;
+            allUploads = allUploads.filter(u => u.id !== id);
+            await saveUploads(allUploads);
+            renderAdminView();
+            showToast('Deleted');
+        }
+
+        // ============================================================
+        //  INIT - Load data on page load
+        // ============================================================
+        window.onload = function() {
+            loadUploads();
+        };
+    </script>
+</body>
+</html>
