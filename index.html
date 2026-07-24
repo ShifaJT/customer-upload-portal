@@ -264,6 +264,9 @@
         .toast.error {
             background: #fc8181;
         }
+        .toast.warning {
+            background: #ed8936;
+        }
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
@@ -368,6 +371,21 @@
         .lightbox .close:hover {
             color: #fc8181;
         }
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        .progress-bar .fill {
+            height: 100%;
+            background: #48bb78;
+            width: 0%;
+            transition: width 0.3s;
+            border-radius: 3px;
+        }
         @media (max-width: 600px) {
             .header h1 {
                 font-size: 22px;
@@ -434,6 +452,7 @@
                                    accept="image/*,video/*,.pdf,.doc,.docx" />
                         </div>
                         <div id="fileList" class="file-list"></div>
+                        <div id="fileCount" style="font-size: 12px; color: #718096; margin-top: 5px;"></div>
                     </div>
 
                     <div class="form-group">
@@ -442,6 +461,10 @@
                             📍 Share My Location
                         </button>
                         <div id="locationDisplay" style="margin-top: 8px; font-size: 14px; color: #4a5568;"></div>
+                    </div>
+
+                    <div class="progress-bar" id="progressBar" style="display:none;">
+                        <div class="fill" id="progressFill"></div>
                     </div>
 
                     <button type="submit" class="btn btn-primary" id="submitBtn">
@@ -478,8 +501,7 @@
 
                     <div class="data-info">
                         <strong>💾 Data Storage:</strong> Uploads are saved in your browser (localStorage). 
-                        They will stay until you clear your browser data. 
-                        Use <strong>"Download All"</strong> to save a backup.
+                        <span id="storageInfo"></span>
                     </div>
 
                     <div class="stats" id="statsContainer"></div>
@@ -500,7 +522,7 @@
         //  CONFIGURATION - EDIT THIS!
         // ============================================================
         const CONFIG = {
-            adminPassword: 'Jumbo123'  // CHANGE THIS PASSWORD!
+            adminPassword: 'admin123'  // CHANGE THIS PASSWORD!
         };
 
         // ============================================================
@@ -562,8 +584,10 @@
 
         function renderFileList() {
             const container = document.getElementById('fileList');
+            const countDisplay = document.getElementById('fileCount');
             if (selectedFiles.length === 0) {
                 container.innerHTML = '';
+                countDisplay.textContent = '';
                 return;
             }
             container.innerHTML = selectedFiles.map((f, i) => `
@@ -572,6 +596,7 @@
                     <span class="remove" onclick="removeFile(${i})">✕</span>
                 </span>
             `).join('');
+            countDisplay.textContent = `${selectedFiles.length} file(s) selected (${(selectedFiles.reduce((a,b) => a + b.size, 0)/1024/1024).toFixed(1)} MB total)`;
         }
 
         function removeFile(index) {
@@ -639,13 +664,26 @@
         });
 
         // ============================================================
-        //  STORAGE FUNCTIONS (localStorage only - SIMPLE!)
+        //  STORAGE FUNCTIONS (localStorage with compression)
         // ============================================================
+        function getStorageSize() {
+            let total = 0;
+            for (let key in localStorage) {
+                if (localStorage.hasOwnProperty(key)) {
+                    total += localStorage[key].length * 2; // UTF-16
+                }
+            }
+            return total;
+        }
+
         function loadUploads() {
             try {
                 const data = localStorage.getItem('uploads');
                 allUploads = data ? JSON.parse(data) : [];
                 renderAdminView();
+                // Update storage info
+                const size = (getStorageSize() / 1024 / 1024).toFixed(2);
+                document.getElementById('storageInfo').textContent = `Used: ${size} MB of ~5 MB available.`;
                 return allUploads;
             } catch (e) {
                 allUploads = [];
@@ -656,16 +694,26 @@
 
         function saveUploads(data) {
             try {
-                localStorage.setItem('uploads', JSON.stringify(data));
+                // Check size before saving
+                const test = JSON.stringify(data);
+                if (test.length > 4.5 * 1024 * 1024) { // 4.5 MB limit
+                    showToast('Storage limit reached! Please download and clear old uploads.', 'warning');
+                    return false;
+                }
+                localStorage.setItem('uploads', test);
                 return true;
             } catch (e) {
-                showToast('Error saving data', 'error');
+                if (e.name === 'QuotaExceededError') {
+                    showToast('Storage full! Please download and delete old uploads.', 'error');
+                } else {
+                    showToast('Error saving data: ' + e.message, 'error');
+                }
                 return false;
             }
         }
 
         // ============================================================
-        //  SUBMIT HANDLER
+        //  SUBMIT HANDLER - WITH PROPER ERROR HANDLING
         // ============================================================
         async function handleSubmit(e) {
             e.preventDefault();
@@ -681,24 +729,45 @@
             }
 
             const btn = document.getElementById('submitBtn');
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            
             btn.disabled = true;
             btn.textContent = '⏳ Uploading...';
+            progressBar.style.display = 'block';
+            progressFill.style.width = '0%';
 
             try {
-                // Read files as base64
-                const fileData = await Promise.all(selectedFiles.map(f => {
-                    return new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            resolve({
-                                name: f.name,
-                                type: f.type,
-                                size: f.size,
-                                data: e.target.result
-                            });
-                        };
-                        reader.readAsDataURL(f);
-                    });
+                // Show progress
+                let processed = 0;
+                const totalFiles = selectedFiles.length;
+
+                // Compress images before storing
+                const fileData = await Promise.all(selectedFiles.map(async (f, index) => {
+                    let dataUrl;
+                    
+                    // Compress images if they're large
+                    if (f.type.startsWith('image/') && f.size > 500 * 1024) {
+                        try {
+                            dataUrl = await compressImage(f, 1024, 0.7);
+                        } catch (e) {
+                            // If compression fails, use original
+                            dataUrl = await readFileAsDataURL(f);
+                        }
+                    } else {
+                        dataUrl = await readFileAsDataURL(f);
+                    }
+                    
+                    processed++;
+                    const percent = (processed / totalFiles) * 100;
+                    progressFill.style.width = percent + '%';
+                    
+                    return {
+                        name: f.name,
+                        type: f.type,
+                        size: f.size,
+                        data: dataUrl
+                    };
                 }));
 
                 const upload = {
@@ -710,16 +779,32 @@
                     viewed: false
                 };
 
+                // Check total size
+                const testData = [upload, ...allUploads];
+                const testString = JSON.stringify(testData);
+                if (testString.length > 4.5 * 1024 * 1024) {
+                    showToast('Storage limit reached! Please clear old uploads first.', 'warning');
+                    btn.disabled = false;
+                    btn.textContent = '🚀 Submit';
+                    progressBar.style.display = 'none';
+                    return;
+                }
+
                 // Load existing, add new, save
                 const existing = loadUploads();
                 existing.unshift(upload);
-                saveUploads(existing);
+                const saved = saveUploads(existing);
+                
+                if (!saved) {
+                    throw new Error('Failed to save data');
+                }
 
                 // Reset form
                 selectedFiles = [];
                 userLocation = null;
                 document.getElementById('mobile').value = '';
                 document.getElementById('fileList').innerHTML = '';
+                document.getElementById('fileCount').textContent = '';
                 document.getElementById('locationDisplay').innerHTML = '';
                 document.getElementById('fileInput').value = '';
 
@@ -731,11 +816,55 @@
                 }
             } catch (err) {
                 console.error('Upload error:', err);
-                showToast('Upload failed. Please try again.', 'error');
+                showToast('Upload failed: ' + err.message, 'error');
             } finally {
                 btn.disabled = false;
                 btn.textContent = '🚀 Submit';
+                progressBar.style.display = 'none';
+                progressFill.style.width = '0%';
             }
+        }
+
+        // Helper: Read file as data URL
+        function readFileAsDataURL(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(e);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Helper: Compress image
+        function compressImage(file, maxSize, quality) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // Scale down if too large
+                        if (width > maxSize || height > maxSize) {
+                            const ratio = Math.min(maxSize / width, maxSize / height);
+                            width = Math.round(width * ratio);
+                            height = Math.round(height * ratio);
+                        }
+                        
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
         }
 
         // ============================================================
