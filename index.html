@@ -95,13 +95,21 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
+            background: #fafafa;
         }
         .file-drop:hover {
             border-color: #667eea;
             background: #f7fafc;
         }
-        .file-drop input {
-            display: none;
+        .file-drop.dragover {
+            border-color: #667eea;
+            background: #ebf4ff;
+        }
+        .file-drop input[type="file"] {
+            display: block;
+            margin: 10px auto;
+            width: 100%;
+            max-width: 300px;
         }
         .file-list {
             display: flex;
@@ -131,11 +139,11 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            width: 100%;
         }
         .btn-primary {
             background: #667eea;
             color: white;
+            width: 100%;
         }
         .btn-primary:hover {
             background: #5a67d8;
@@ -351,7 +359,6 @@
             font-size: 14px;
             margin-top: 8px;
         }
-        /* Lightbox */
         .lightbox {
             display: none;
             position: fixed;
@@ -384,6 +391,14 @@
         }
         .lightbox .close:hover {
             color: #fc8181;
+        }
+        .debug-info {
+            background: #edf2f7;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #4a5568;
+            margin-top: 8px;
         }
         @media (max-width: 600px) {
             .header h1 {
@@ -424,8 +439,8 @@
         <!-- TABS -->
         <div class="card">
             <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('customer')">📱 Customer</button>
-                <button class="tab-btn" onclick="switchTab('admin')">🔐 Admin</button>
+                <button class="tab-btn active" id="customerTabBtn" onclick="switchTab('customer')">📱 Customer</button>
+                <button class="tab-btn" id="adminTabBtn" onclick="switchTab('admin')">🔐 Admin</button>
             </div>
         </div>
 
@@ -441,22 +456,26 @@
 
                     <div class="form-group">
                         <label>📎 Upload Files *</label>
-                        <div class="file-drop" onclick="document.getElementById('fileInput').click()">
+                        <div class="file-drop" id="fileDrop">
                             <div style="font-size: 40px;">📁</div>
-                            <div style="font-weight: 500;">Click to select files</div>
+                            <div style="font-weight: 500;">Click to select files or drag & drop</div>
                             <div style="font-size: 13px; color: #718096; margin-top: 6px;">
                                 Images, Videos, PDF, Word (Max 25MB each)
                             </div>
                             <input type="file" id="fileInput" multiple 
                                    accept="image/*,video/*,.pdf,.doc,.docx" 
-                                   onchange="handleFiles(this.files)" />
+                                   style="margin-top: 10px;" />
+                            <div style="font-size: 12px; color: #667eea; margin-top: 6px;">
+                                Click the "Choose Files" button above
+                            </div>
                         </div>
                         <div id="fileList" class="file-list"></div>
+                        <div id="fileDebug" class="debug-info"></div>
                     </div>
 
                     <div class="form-group">
                         <label>📍 Location (Optional)</label>
-                        <button type="button" class="location-btn" onclick="getLocation()">
+                        <button type="button" class="location-btn" id="locationBtn" onclick="getLocation()">
                             📍 Share My Location
                         </button>
                         <div id="locationDisplay" style="margin-top: 8px; font-size: 14px; color: #4a5568;"></div>
@@ -551,11 +570,11 @@
             if (tab === 'customer') {
                 document.getElementById('customerTab').style.display = 'block';
                 document.getElementById('adminTab').style.display = 'none';
-                document.querySelector('.tab-btn:first-child').classList.add('active');
+                document.getElementById('customerTabBtn').classList.add('active');
             } else {
                 document.getElementById('customerTab').style.display = 'none';
                 document.getElementById('adminTab').style.display = 'block';
-                document.querySelector('.tab-btn:last-child').classList.add('active');
+                document.getElementById('adminTabBtn').classList.add('active');
                 if (isAdmin) {
                     document.getElementById('adminLogin').style.display = 'none';
                     document.getElementById('adminDashboard').style.display = 'block';
@@ -567,7 +586,42 @@
             }
         }
 
+        // File input handler - FIXED!
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            console.log('File selected!', this.files.length, 'files');
+            const files = this.files;
+            if (files.length > 0) {
+                handleFiles(files);
+                document.getElementById('fileDebug').textContent = `✅ ${files.length} file(s) selected`;
+            } else {
+                document.getElementById('fileDebug').textContent = '❌ No files selected';
+            }
+        });
+
+        // Drag and drop support
+        const fileDrop = document.getElementById('fileDrop');
+        fileDrop.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+        fileDrop.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+        fileDrop.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFiles(files);
+                document.getElementById('fileDebug').textContent = `✅ ${files.length} file(s) dropped`;
+                // Also update the file input
+                document.getElementById('fileInput').files = files;
+            }
+        });
+
         function handleFiles(files) {
+            console.log('Processing files:', files);
             const validFiles = [];
             for (let f of files) {
                 const isValidType = f.type.startsWith('image/') || 
@@ -585,6 +639,7 @@
             }
             selectedFiles = [...selectedFiles, ...validFiles];
             renderFileList();
+            document.getElementById('fileDebug').textContent = `📎 ${selectedFiles.length} file(s) ready to upload`;
         }
 
         function renderFileList() {
@@ -604,13 +659,19 @@
         function removeFile(index) {
             selectedFiles.splice(index, 1);
             renderFileList();
+            document.getElementById('fileDebug').textContent = `📎 ${selectedFiles.length} file(s) ready to upload`;
         }
 
         function getLocation() {
+            console.log('Getting location...');
             if (!navigator.geolocation) {
-                showToast('Geolocation not supported', 'error');
+                showToast('Geolocation not supported by this browser', 'error');
+                document.getElementById('locationDisplay').innerHTML = '❌ Geolocation not supported';
                 return;
             }
+            
+            document.getElementById('locationDisplay').innerHTML = '⏳ Getting location...';
+            
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
                     userLocation = {
@@ -619,9 +680,22 @@
                     };
                     document.getElementById('locationDisplay').innerHTML = 
                         `✅ Location: ${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}`;
+                    showToast('📍 Location shared successfully!');
+                    console.log('Location obtained:', userLocation);
                 },
-                () => {
-                    showToast('Unable to get location. Please enable location services.', 'error');
+                (error) => {
+                    console.error('Location error:', error);
+                    let msg = 'Unable to get location. ';
+                    if (error.code === 1) msg += 'Please allow location access.';
+                    else if (error.code === 2) msg += 'Location unavailable.';
+                    else if (error.code === 3) msg += 'Location request timed out.';
+                    showToast(msg, 'error');
+                    document.getElementById('locationDisplay').innerHTML = `❌ ${msg}`;
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
                 }
             );
         }
@@ -648,7 +722,6 @@
             document.getElementById('lightbox').classList.remove('active');
         }
 
-        // Close lightbox with Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeLightbox();
@@ -768,8 +841,11 @@
         // ============================================================
         async function handleSubmit(e) {
             e.preventDefault();
+            console.log('Form submitted!');
 
             const mobile = document.getElementById('mobile').value.trim();
+            console.log('Mobile:', mobile);
+            
             if (!mobile || mobile.length !== 10) {
                 showToast('Please enter a valid 10-digit mobile number', 'error');
                 return;
@@ -784,6 +860,7 @@
             btn.textContent = '⏳ Uploading...';
 
             try {
+                console.log('Reading files...');
                 const fileData = await Promise.all(selectedFiles.map(f => {
                     return new Promise((resolve) => {
                         const reader = new FileReader();
@@ -795,37 +872,54 @@
                                 data: e.target.result
                             });
                         };
+                        reader.onerror = (err) => {
+                            console.error('Error reading file:', err);
+                            resolve(null);
+                        };
                         reader.readAsDataURL(f);
                     });
                 }));
 
+                // Filter out any failed reads
+                const validFiles = fileData.filter(f => f !== null);
+                if (validFiles.length === 0) {
+                    showToast('Failed to read files. Please try again.', 'error');
+                    return;
+                }
+
+                console.log('Files read successfully:', validFiles.length);
+
                 const upload = {
                     id: Date.now().toString(),
                     mobile: mobile,
-                    files: fileData,
+                    files: validFiles,
                     location: userLocation,
                     timestamp: new Date().toISOString(),
                     viewed: false
                 };
 
+                console.log('Saving upload...');
                 const existing = await loadUploads();
                 existing.unshift(upload);
                 await saveUploads(existing);
 
+                // Reset form
                 selectedFiles = [];
                 userLocation = null;
                 document.getElementById('mobile').value = '';
                 document.getElementById('fileList').innerHTML = '';
                 document.getElementById('locationDisplay').innerHTML = '';
                 document.getElementById('fileInput').value = '';
+                document.getElementById('fileDebug').textContent = '';
 
                 showToast('✅ Upload successful! Check Admin panel.');
+                console.log('Upload complete!');
                 
                 if (isAdmin) {
                     await loadUploads();
                 }
             } catch (err) {
-                console.error(err);
+                console.error('Upload error:', err);
                 showToast('Upload failed. Please try again.', 'error');
             } finally {
                 btn.disabled = false;
@@ -879,10 +973,9 @@
             }
 
             container.innerHTML = filtered.map((u, index) => {
-                // Generate file previews
                 const filesHtml = u.files.map((f, i) => {
-                    const isImage = f.type.startsWith('image/');
-                    const isVideo = f.type.startsWith('video/');
+                    const isImage = f.type && f.type.startsWith('image/');
+                    const isVideo = f.type && f.type.startsWith('video/');
                     
                     if (isImage) {
                         return `
@@ -901,11 +994,11 @@
                             </div>
                         `;
                     } else {
-                        const icon = f.name.endsWith('.pdf') ? '📄' : '📝';
+                        const icon = f.name && f.name.endsWith('.pdf') ? '📄' : '📝';
                         return `
                             <div class="file-preview" onclick="window.open('${f.data}', '_blank')">
                                 <div class="file-icon">${icon}</div>
-                                <div class="file-name">${f.name}</div>
+                                <div class="file-name">${f.name || 'File'}</div>
                                 <div class="file-size">${(f.size/1024).toFixed(1)} KB</div>
                             </div>
                         `;
@@ -988,12 +1081,21 @@
         //  INIT
         // ============================================================
         window.onload = function() {
+            console.log('🚀 Portal loading...');
+            
             const savedToken = localStorage.getItem('githubToken');
             if (savedToken) {
                 githubToken = savedToken;
                 document.getElementById('tokenStatus').innerHTML = '✅ Token saved';
             }
+            
             loadUploads();
+            
+            // Check if everything is loaded
+            console.log('✅ File input:', document.getElementById('fileInput'));
+            console.log('✅ Location button:', document.getElementById('locationBtn'));
+            console.log('✅ Submit button:', document.getElementById('submitBtn'));
+            
             console.log('📤 Customer Upload Portal loaded!');
             console.log(`📊 ${allUploads.length} uploads found`);
         };
