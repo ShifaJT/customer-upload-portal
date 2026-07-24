@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Customer Upload Portal</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f0f2f5;
@@ -27,14 +23,8 @@
             text-align: center;
             margin-bottom: 20px;
         }
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 8px;
-        }
-        .header p {
-            opacity: 0.9;
-            font-size: 14px;
-        }
+        .header h1 { font-size: 28px; margin-bottom: 8px; }
+        .header p { opacity: 0.9; font-size: 14px; }
         .card {
             background: white;
             border-radius: 12px;
@@ -42,9 +32,7 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-bottom: 20px;
         }
-        .form-group {
-            margin-bottom: 18px;
-        }
+        .form-group { margin-bottom: 18px; }
         .form-group label {
             display: block;
             font-weight: 600;
@@ -148,21 +136,11 @@
             z-index: 9999;
             animation: slideIn 0.3s;
         }
-        .toast.error {
-            background: #fc8181;
-        }
-        .toast.warning {
-            background: #ed8936;
-        }
+        .toast.error { background: #fc8181; }
+        .toast.warning { background: #ed8936; }
         @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
         .progress-bar {
             width: 100%;
@@ -185,10 +163,18 @@
             font-size: 12px;
             margin-top: 20px;
         }
+        .status-banner {
+            background: #ebf8ff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            border: 1px solid #bee3f8;
+            color: #2b6cb0;
+            text-align: center;
+        }
         @media (max-width: 600px) {
-            .header h1 {
-                font-size: 22px;
-            }
+            .header h1 { font-size: 22px; }
         }
     </style>
 </head>
@@ -201,6 +187,10 @@
         </div>
 
         <div class="card">
+            <div class="status-banner">
+                ✅ Secure upload to cloud storage
+            </div>
+
             <form id="uploadForm" onsubmit="handleSubmit(event)">
                 <div class="form-group">
                     <label>📱 Mobile Number *</label>
@@ -248,10 +238,17 @@
 
     <script>
         // ============================================================
-        //  🔑 CONFIGURATION - PUT YOUR API KEY HERE!
+        //  🔑 CONFIGURATION - EDIT THESE TWO LINES ONLY!
         // ============================================================
-        // Get your FREE key from: https://api.imgbb.com/
-        const IMGBB_API_KEY = 'bb3fb10ee503d971c536d6dda8f2e735';
+        const IMGBB_API_KEY = 'bb3fb10ee503d971c536d6dda8f2e735';  // ← Get from https://api.imgbb.com/
+        const GITHUB_TOKEN = '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';     // ← Get from https://github.com/settings/tokens (No Expiration!)
+        
+        // ============================================================
+        //  GITHUB SETTINGS (Don't change these)
+        // ============================================================
+        const GITHUB_OWNER = 'shifajt';
+        const GITHUB_REPO = 'customer-upload-portal';
+        const GITHUB_BRANCH = 'main';
 
         // ============================================================
         //  APP STATE
@@ -351,7 +348,7 @@
         }
 
         // ============================================================
-        //  UPLOAD TO IMGBB CLOUD (NO LOCAL STORAGE!)
+        //  UPLOAD TO IMGBB CLOUD
         // ============================================================
         async function uploadToImgbb(file) {
             return new Promise((resolve, reject) => {
@@ -378,7 +375,6 @@
                                 size: file.size,
                                 url: data.data.url,
                                 thumb: data.data.thumb?.url || data.data.url,
-                                delete_url: data.data.delete_url,
                                 cloud: true
                             });
                         } else {
@@ -394,33 +390,68 @@
         }
 
         // ============================================================
-        //  STORAGE FUNCTIONS (ONLY STORES METADATA - NO BASE64!)
+        //  GITHUB STORAGE - PERMANENT & SHARED!
         // ============================================================
-        function loadUploads() {
+        async function loadFromGitHub() {
             try {
-                const data = localStorage.getItem('uploads');
-                return data ? JSON.parse(data) : [];
+                const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/uploads.json`;
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const content = atob(data.content);
+                    return {
+                        data: JSON.parse(content),
+                        sha: data.sha
+                    };
+                } else if (response.status === 404) {
+                    return { data: [], sha: null };
+                } else {
+                    throw new Error('Failed to load data from GitHub');
+                }
             } catch (e) {
-                return [];
+                console.error('GitHub load error:', e);
+                const localData = localStorage.getItem('uploads');
+                return { data: localData ? JSON.parse(localData) : [], sha: null };
             }
         }
 
-        function saveUploads(data) {
+        async function saveToGitHub(data, sha) {
             try {
-                // Check data size before saving
-                const test = JSON.stringify(data);
-                if (test.length > 4 * 1024 * 1024) {
-                    showToast('⚠️ Storage limit reached! Please download and clear old uploads.', 'warning');
-                    return false;
+                const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/uploads.json`;
+                
+                const body = {
+                    message: `Update uploads - ${new Date().toISOString()}`,
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))),
+                    branch: GITHUB_BRANCH
+                };
+                if (sha) body.sha = sha;
+
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to save to GitHub');
                 }
-                localStorage.setItem('uploads', test);
+
+                localStorage.setItem('uploads', JSON.stringify(data));
                 return true;
             } catch (e) {
-                if (e.name === 'QuotaExceededError') {
-                    showToast('❌ Storage full! Please clear old uploads.', 'error');
-                } else {
-                    showToast('Error saving: ' + e.message, 'error');
-                }
+                console.error('GitHub save error:', e);
+                localStorage.setItem('uploads', JSON.stringify(data));
+                showToast('⚠️ Saved locally only (GitHub sync failed)', 'warning');
                 return false;
             }
         }
@@ -441,18 +472,12 @@
                 return;
             }
 
-            if (!IMGBB_API_KEY || IMGBB_API_KEY === 'bb3fb10ee503d971c536d6dda8f2e735') {
-                showToast('⚠️ System configuration error. Please contact support.', 'error');
-                console.error('API key not set!');
-                return;
-            }
-
             const btn = document.getElementById('submitBtn');
             const progressBar = document.getElementById('progressBar');
             const progressFill = document.getElementById('progressFill');
             
             btn.disabled = true;
-            btn.textContent = '⏳ Uploading to Cloud...';
+            btn.textContent = '⏳ Uploading...';
             progressBar.style.display = 'block';
             progressFill.style.width = '0%';
 
@@ -460,7 +485,6 @@
                 const totalFiles = selectedFiles.length;
                 const uploadedFiles = [];
 
-                // Upload each file to imgbb
                 for (let i = 0; i < selectedFiles.length; i++) {
                     const file = selectedFiles[i];
                     
@@ -469,11 +493,9 @@
                     btn.textContent = `⏳ Uploading ${i+1}/${totalFiles}...`;
 
                     if (file.type.startsWith('image/')) {
-                        // Upload images to imgbb
                         const result = await uploadToImgbb(file);
                         uploadedFiles.push(result);
                     } else {
-                        // For non-images, store as base64 (these are usually small)
                         const dataUrl = await readFileAsDataURL(file);
                         uploadedFiles.push({
                             name: file.name,
@@ -486,8 +508,10 @@
                 }
 
                 progressFill.style.width = '100%';
-                btn.textContent = '✅ Saving...';
+                btn.textContent = '💾 Saving to GitHub...';
 
+                const { data: existingData, sha } = await loadFromGitHub();
+                
                 const upload = {
                     id: Date.now().toString(),
                     mobile: mobile,
@@ -497,17 +521,9 @@
                     viewed: false
                 };
 
-                // Load existing and add new upload
-                const existing = loadUploads();
-                existing.unshift(upload);
-                
-                // Save only if within limit
-                const saved = saveUploads(existing);
-                if (!saved) {
-                    throw new Error('Storage limit reached');
-                }
+                existingData.unshift(upload);
+                await saveToGitHub(existingData, sha);
 
-                // Reset form
                 selectedFiles = [];
                 userLocation = null;
                 document.getElementById('mobile').value = '';
@@ -516,7 +532,7 @@
                 document.getElementById('locationDisplay').innerHTML = '';
                 document.getElementById('fileInput').value = '';
 
-                showToast('✅ Upload successful! Thank you.');
+                showToast('✅ Upload successful! Data saved to GitHub.');
             } catch (err) {
                 console.error('Upload error:', err);
                 showToast('❌ Upload failed: ' + err.message, 'error');
@@ -537,16 +553,13 @@
             });
         }
 
-        // ============================================================
-        //  INIT
-        // ============================================================
         window.onload = function() {
             console.log('📤 Customer Upload Portal loaded!');
             if (!IMGBB_API_KEY || IMGBB_API_KEY === 'bb3fb10ee503d971c536d6dda8f2e735') {
                 console.warn('⚠️ Please set your imgbb API key!');
-                showToast('⚠️ System configuration: API key missing', 'warning');
-            } else {
-                console.log('✅ API key configured');
+            }
+            if (!GITHUB_TOKEN || GITHUB_TOKEN === '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') {
+                console.warn('⚠️ Please set your GitHub token!');
             }
         };
     </script>
