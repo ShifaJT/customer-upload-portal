@@ -90,7 +90,7 @@
         }
         .file-drop {
             border: 2px dashed #e2e8f0;
-            padding: 40px 20px;
+            padding: 30px 20px;
             text-align: center;
             border-radius: 8px;
             cursor: pointer;
@@ -100,10 +100,6 @@
         .file-drop:hover {
             border-color: #667eea;
             background: #f7fafc;
-        }
-        .file-drop.dragover {
-            border-color: #667eea;
-            background: #ebf4ff;
         }
         .file-drop input[type="file"] {
             display: block;
@@ -159,16 +155,6 @@
         }
         .btn-danger {
             background: #fc8181;
-            color: white;
-        }
-        .btn-outline {
-            background: transparent;
-            border: 2px solid #667eea;
-            color: #667eea;
-            width: auto;
-        }
-        .btn-outline:hover {
-            background: #667eea;
             color: white;
         }
         .location-btn {
@@ -338,26 +324,16 @@
         .download-all:hover {
             background: #38a169;
         }
-        .github-token-info {
-            background: #fefcbf;
+        .data-info {
+            background: #ebf8ff;
             padding: 12px;
             border-radius: 8px;
             margin-bottom: 15px;
             font-size: 13px;
+            border: 1px solid #bee3f8;
         }
-        .github-token-info code {
-            background: white;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-        .token-input {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 14px;
-            margin-top: 8px;
+        .data-info strong {
+            color: #2b6cb0;
         }
         .lightbox {
             display: none;
@@ -391,14 +367,6 @@
         }
         .lightbox .close:hover {
             color: #fc8181;
-        }
-        .debug-info {
-            background: #edf2f7;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            color: #4a5568;
-            margin-top: 8px;
         }
         @media (max-width: 600px) {
             .header h1 {
@@ -439,8 +407,8 @@
         <!-- TABS -->
         <div class="card">
             <div class="tabs">
-                <button class="tab-btn active" id="customerTabBtn" onclick="switchTab('customer')">📱 Customer</button>
-                <button class="tab-btn" id="adminTabBtn" onclick="switchTab('admin')">🔐 Admin</button>
+                <button class="tab-btn active" onclick="switchTab('customer')">📱 Customer</button>
+                <button class="tab-btn" onclick="switchTab('admin')">🔐 Admin</button>
             </div>
         </div>
 
@@ -456,26 +424,21 @@
 
                     <div class="form-group">
                         <label>📎 Upload Files *</label>
-                        <div class="file-drop" id="fileDrop">
+                        <div class="file-drop">
                             <div style="font-size: 40px;">📁</div>
-                            <div style="font-weight: 500;">Click to select files or drag & drop</div>
+                            <div style="font-weight: 500;">Click to select files</div>
                             <div style="font-size: 13px; color: #718096; margin-top: 6px;">
                                 Images, Videos, PDF, Word (Max 25MB each)
                             </div>
                             <input type="file" id="fileInput" multiple 
-                                   accept="image/*,video/*,.pdf,.doc,.docx" 
-                                   style="margin-top: 10px;" />
-                            <div style="font-size: 12px; color: #667eea; margin-top: 6px;">
-                                Click the "Choose Files" button above
-                            </div>
+                                   accept="image/*,video/*,.pdf,.doc,.docx" />
                         </div>
                         <div id="fileList" class="file-list"></div>
-                        <div id="fileDebug" class="debug-info"></div>
                     </div>
 
                     <div class="form-group">
                         <label>📍 Location (Optional)</label>
-                        <button type="button" class="location-btn" id="locationBtn" onclick="getLocation()">
+                        <button type="button" class="location-btn" onclick="getLocation()">
                             📍 Share My Location
                         </button>
                         <div id="locationDisplay" style="margin-top: 8px; font-size: 14px; color: #4a5568;"></div>
@@ -513,20 +476,10 @@
                         </div>
                     </div>
 
-                    <!-- GitHub Token Setup -->
-                    <div class="github-token-info">
-                        <strong>🔑 GitHub Setup Required</strong><br>
-                        To save uploads permanently, create a GitHub Personal Access Token:
-                        <ol style="margin:8px 0 8px 20px; font-size:13px;">
-                            <li>Go to <a href="https://github.com/settings/tokens" target="_blank">GitHub Settings → Tokens</a></li>
-                            <li>Click "Generate new token (classic)"</li>
-                            <li>Name it: <code>upload-portal</code></li>
-                            <li>Select <code>repo</code> scope</li>
-                            <li>Click "Generate token" and copy it</li>
-                        </ol>
-                        <input type="password" id="githubToken" placeholder="Paste your GitHub token here" class="token-input" />
-                        <button class="btn btn-primary" onclick="saveGitHubToken()" style="width:auto; padding:8px 20px; margin-top:8px;">💾 Save Token</button>
-                        <div id="tokenStatus" style="margin-top:6px; font-size:13px;"></div>
+                    <div class="data-info">
+                        <strong>💾 Data Storage:</strong> Uploads are saved in your browser (localStorage). 
+                        They will stay until you clear your browser data. 
+                        Use <strong>"Download All"</strong> to save a backup.
                     </div>
 
                     <div class="stats" id="statsContainer"></div>
@@ -544,13 +497,10 @@
 
     <script>
         // ============================================================
-        //  CONFIGURATION - EDIT THESE!
+        //  CONFIGURATION - EDIT THIS!
         // ============================================================
         const CONFIG = {
-            adminPassword: 'admin123',  // CHANGE THIS!
-            owner: 'ShifaJT',      // CHANGE TO YOUR GITHUB USERNAME
-            repo: 'customer-upload-portal',
-            branch: 'main'
+            adminPassword: 'Jumbo123'  // CHANGE THIS PASSWORD!
         };
 
         // ============================================================
@@ -560,7 +510,6 @@
         let userLocation = null;
         let allUploads = [];
         let isAdmin = false;
-        let githubToken = localStorage.getItem('githubToken') || '';
 
         // ============================================================
         //  UI FUNCTIONS
@@ -570,58 +519,28 @@
             if (tab === 'customer') {
                 document.getElementById('customerTab').style.display = 'block';
                 document.getElementById('adminTab').style.display = 'none';
-                document.getElementById('customerTabBtn').classList.add('active');
+                document.querySelector('.tab-btn:first-child').classList.add('active');
             } else {
                 document.getElementById('customerTab').style.display = 'none';
                 document.getElementById('adminTab').style.display = 'block';
-                document.getElementById('adminTabBtn').classList.add('active');
+                document.querySelector('.tab-btn:last-child').classList.add('active');
                 if (isAdmin) {
                     document.getElementById('adminLogin').style.display = 'none';
                     document.getElementById('adminDashboard').style.display = 'block';
                     loadUploads();
                 }
-                if (githubToken) {
-                    document.getElementById('tokenStatus').innerHTML = '✅ Token saved';
-                }
             }
         }
 
-        // File input handler - FIXED!
+        // File input handler
         document.getElementById('fileInput').addEventListener('change', function(e) {
-            console.log('File selected!', this.files.length, 'files');
             const files = this.files;
             if (files.length > 0) {
                 handleFiles(files);
-                document.getElementById('fileDebug').textContent = `✅ ${files.length} file(s) selected`;
-            } else {
-                document.getElementById('fileDebug').textContent = '❌ No files selected';
-            }
-        });
-
-        // Drag and drop support
-        const fileDrop = document.getElementById('fileDrop');
-        fileDrop.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            this.classList.add('dragover');
-        });
-        fileDrop.addEventListener('dragleave', function(e) {
-            e.preventDefault();
-            this.classList.remove('dragover');
-        });
-        fileDrop.addEventListener('drop', function(e) {
-            e.preventDefault();
-            this.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFiles(files);
-                document.getElementById('fileDebug').textContent = `✅ ${files.length} file(s) dropped`;
-                // Also update the file input
-                document.getElementById('fileInput').files = files;
             }
         });
 
         function handleFiles(files) {
-            console.log('Processing files:', files);
             const validFiles = [];
             for (let f of files) {
                 const isValidType = f.type.startsWith('image/') || 
@@ -639,7 +558,6 @@
             }
             selectedFiles = [...selectedFiles, ...validFiles];
             renderFileList();
-            document.getElementById('fileDebug').textContent = `📎 ${selectedFiles.length} file(s) ready to upload`;
         }
 
         function renderFileList() {
@@ -659,11 +577,9 @@
         function removeFile(index) {
             selectedFiles.splice(index, 1);
             renderFileList();
-            document.getElementById('fileDebug').textContent = `📎 ${selectedFiles.length} file(s) ready to upload`;
         }
 
         function getLocation() {
-            console.log('Getting location...');
             if (!navigator.geolocation) {
                 showToast('Geolocation not supported by this browser', 'error');
                 document.getElementById('locationDisplay').innerHTML = '❌ Geolocation not supported';
@@ -681,7 +597,6 @@
                     document.getElementById('locationDisplay').innerHTML = 
                         `✅ Location: ${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}`;
                     showToast('📍 Location shared successfully!');
-                    console.log('Location obtained:', userLocation);
                 },
                 (error) => {
                     console.error('Location error:', error);
@@ -691,11 +606,6 @@
                     else if (error.code === 3) msg += 'Location request timed out.';
                     showToast(msg, 'error');
                     document.getElementById('locationDisplay').innerHTML = `❌ ${msg}`;
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
                 }
             );
         }
@@ -729,110 +639,28 @@
         });
 
         // ============================================================
-        //  GITHUB TOKEN FUNCTIONS
+        //  STORAGE FUNCTIONS (localStorage only - SIMPLE!)
         // ============================================================
-        function saveGitHubToken() {
-            const token = document.getElementById('githubToken').value.trim();
-            if (token) {
-                githubToken = token;
-                localStorage.setItem('githubToken', token);
-                document.getElementById('tokenStatus').innerHTML = '✅ Token saved!';
-                showToast('GitHub token saved successfully!');
-            } else {
-                showToast('Please paste a valid token', 'error');
-            }
-        }
-
-        // ============================================================
-        //  STORAGE FUNCTIONS
-        // ============================================================
-        async function loadUploads() {
-            if (!githubToken) {
-                const localData = localStorage.getItem('uploads');
-                allUploads = localData ? JSON.parse(localData) : [];
-                renderAdminView();
-                return allUploads;
-            }
-
+        function loadUploads() {
             try {
-                const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/uploads.json`;
-                const response = await fetch(url, {
-                    headers: {
-                        'Authorization': `token ${githubToken}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    const content = atob(data.content);
-                    allUploads = JSON.parse(content);
-                    localStorage.setItem('uploads', JSON.stringify(allUploads));
-                } else {
-                    const localData = localStorage.getItem('uploads');
-                    allUploads = localData ? JSON.parse(localData) : [];
-                }
+                const data = localStorage.getItem('uploads');
+                allUploads = data ? JSON.parse(data) : [];
                 renderAdminView();
                 return allUploads;
             } catch (e) {
-                console.error('Load error:', e);
-                const localData = localStorage.getItem('uploads');
-                allUploads = localData ? JSON.parse(localData) : [];
+                allUploads = [];
                 renderAdminView();
                 return allUploads;
             }
         }
 
-        async function saveUploads(data) {
-            if (!githubToken) {
-                localStorage.setItem('uploads', JSON.stringify(data));
-                return true;
-            }
-
+        function saveUploads(data) {
             try {
-                let sha = null;
-                const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/uploads.json`;
-                const checkResponse = await fetch(url, {
-                    headers: {
-                        'Authorization': `token ${githubToken}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-
-                if (checkResponse.ok) {
-                    const info = await checkResponse.json();
-                    sha = info.sha;
-                }
-
-                const body = {
-                    message: `Update uploads - ${new Date().toISOString()}`,
-                    content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))),
-                    branch: CONFIG.branch
-                };
-                if (sha) body.sha = sha;
-
-                const response = await fetch(url, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${githubToken}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/vnd.github.v3+json'
-                    },
-                    body: JSON.stringify(body)
-                });
-
-                if (response.ok) {
-                    localStorage.setItem('uploads', JSON.stringify(data));
-                    return true;
-                } else {
-                    localStorage.setItem('uploads', JSON.stringify(data));
-                    showToast('Saved locally (GitHub sync failed)', 'error');
-                    return true;
-                }
-            } catch (e) {
-                console.error('Save error:', e);
                 localStorage.setItem('uploads', JSON.stringify(data));
                 return true;
+            } catch (e) {
+                showToast('Error saving data', 'error');
+                return false;
             }
         }
 
@@ -841,11 +669,8 @@
         // ============================================================
         async function handleSubmit(e) {
             e.preventDefault();
-            console.log('Form submitted!');
 
             const mobile = document.getElementById('mobile').value.trim();
-            console.log('Mobile:', mobile);
-            
             if (!mobile || mobile.length !== 10) {
                 showToast('Please enter a valid 10-digit mobile number', 'error');
                 return;
@@ -860,7 +685,7 @@
             btn.textContent = '⏳ Uploading...';
 
             try {
-                console.log('Reading files...');
+                // Read files as base64
                 const fileData = await Promise.all(selectedFiles.map(f => {
                     return new Promise((resolve) => {
                         const reader = new FileReader();
@@ -872,36 +697,23 @@
                                 data: e.target.result
                             });
                         };
-                        reader.onerror = (err) => {
-                            console.error('Error reading file:', err);
-                            resolve(null);
-                        };
                         reader.readAsDataURL(f);
                     });
                 }));
 
-                // Filter out any failed reads
-                const validFiles = fileData.filter(f => f !== null);
-                if (validFiles.length === 0) {
-                    showToast('Failed to read files. Please try again.', 'error');
-                    return;
-                }
-
-                console.log('Files read successfully:', validFiles.length);
-
                 const upload = {
                     id: Date.now().toString(),
                     mobile: mobile,
-                    files: validFiles,
+                    files: fileData,
                     location: userLocation,
                     timestamp: new Date().toISOString(),
                     viewed: false
                 };
 
-                console.log('Saving upload...');
-                const existing = await loadUploads();
+                // Load existing, add new, save
+                const existing = loadUploads();
                 existing.unshift(upload);
-                await saveUploads(existing);
+                saveUploads(existing);
 
                 // Reset form
                 selectedFiles = [];
@@ -910,13 +722,12 @@
                 document.getElementById('fileList').innerHTML = '';
                 document.getElementById('locationDisplay').innerHTML = '';
                 document.getElementById('fileInput').value = '';
-                document.getElementById('fileDebug').textContent = '';
 
                 showToast('✅ Upload successful! Check Admin panel.');
-                console.log('Upload complete!');
                 
+                // Refresh admin view if logged in
                 if (isAdmin) {
-                    await loadUploads();
+                    renderAdminView();
                 }
             } catch (err) {
                 console.error('Upload error:', err);
@@ -1081,21 +892,7 @@
         //  INIT
         // ============================================================
         window.onload = function() {
-            console.log('🚀 Portal loading...');
-            
-            const savedToken = localStorage.getItem('githubToken');
-            if (savedToken) {
-                githubToken = savedToken;
-                document.getElementById('tokenStatus').innerHTML = '✅ Token saved';
-            }
-            
             loadUploads();
-            
-            // Check if everything is loaded
-            console.log('✅ File input:', document.getElementById('fileInput'));
-            console.log('✅ Location button:', document.getElementById('locationBtn'));
-            console.log('✅ Submit button:', document.getElementById('submitBtn'));
-            
             console.log('📤 Customer Upload Portal loaded!');
             console.log(`📊 ${allUploads.length} uploads found`);
         };
