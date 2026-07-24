@@ -314,6 +314,27 @@
         .download-all:hover {
             background: #38a169;
         }
+        .github-token-info {
+            background: #fefcbf;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+        .github-token-info code {
+            background: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .token-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-top: 8px;
+        }
         @media (max-width: 600px) {
             .header h1 {
                 font-size: 22px;
@@ -410,6 +431,22 @@
                         </div>
                     </div>
 
+                    <!-- GitHub Token Setup -->
+                    <div class="github-token-info">
+                        <strong>🔑 GitHub Setup Required</strong><br>
+                        To save uploads permanently, create a GitHub Personal Access Token:
+                        <ol style="margin:8px 0 8px 20px; font-size:13px;">
+                            <li>Go to <a href="https://github.com/settings/tokens" target="_blank">GitHub Settings → Tokens</a></li>
+                            <li>Click "Generate new token (classic)"</li>
+                            <li>Name it: <code>upload-portal</code></li>
+                            <li>Select <code>repo</code> scope</li>
+                            <li>Click "Generate token" and copy it</li>
+                        </ol>
+                        <input type="password" id="githubToken" placeholder="Paste your GitHub token here" class="token-input" />
+                        <button class="btn btn-primary" onclick="saveGitHubToken()" style="width:auto; padding:8px 20px; margin-top:8px;">💾 Save Token</button>
+                        <div id="tokenStatus" style="margin-top:6px; font-size:13px;"></div>
+                    </div>
+
                     <div class="stats" id="statsContainer"></div>
 
                     <div class="filter-box">
@@ -425,11 +462,13 @@
 
     <script>
         // ============================================================
-        //  CONFIGURATION - EDIT THESE!
+        //  CONFIGURATION
         // ============================================================
         const CONFIG = {
-            // Admin password - CHANGE THIS!
-            adminPassword: 'admin123'
+            adminPassword: 'admin123',  // CHANGE THIS!
+            owner: ShifaJT',      // CHANGE TO YOUR GITHUB USERNAME
+            repo: 'customer-upload-portal',
+            branch: 'main'
         };
 
         // ============================================================
@@ -439,6 +478,7 @@
         let userLocation = null;
         let allUploads = [];
         let isAdmin = false;
+        let githubToken = localStorage.getItem('githubToken') || '';
 
         // ============================================================
         //  UI FUNCTIONS
@@ -457,6 +497,10 @@
                     document.getElementById('adminLogin').style.display = 'none';
                     document.getElementById('adminDashboard').style.display = 'block';
                     loadUploads();
+                }
+                // Show token status
+                if (githubToken) {
+                    document.getElementById('tokenStatus').innerHTML = '✅ Token saved';
                 }
             }
         }
@@ -529,28 +573,119 @@
         }
 
         // ============================================================
-        //  STORAGE FUNCTIONS (Using localStorage - WORKS!)
+        //  GITHUB TOKEN FUNCTIONS
         // ============================================================
-        function loadUploads() {
+        function saveGitHubToken() {
+            const token = document.getElementById('githubToken').value.trim();
+            if (token) {
+                githubToken = token;
+                localStorage.setItem('githubToken', token);
+                document.getElementById('tokenStatus').innerHTML = '✅ Token saved!';
+                showToast('GitHub token saved successfully!');
+            } else {
+                showToast('Please paste a valid token', 'error');
+            }
+        }
+
+        // ============================================================
+        //  STORAGE FUNCTIONS (GitHub API with Token)
+        // ============================================================
+        async function loadUploads() {
+            if (!githubToken) {
+                // Try loading from localStorage as fallback
+                const localData = localStorage.getItem('uploads');
+                allUploads = localData ? JSON.parse(localData) : [];
+                renderAdminView();
+                return allUploads;
+            }
+
             try {
-                const data = localStorage.getItem('uploads');
-                allUploads = data ? JSON.parse(data) : [];
+                const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/uploads.json`;
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `token ${githubToken}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const content = atob(data.content);
+                    allUploads = JSON.parse(content);
+                    // Also save to localStorage as backup
+                    localStorage.setItem('uploads', JSON.stringify(allUploads));
+                } else {
+                    // Try localStorage
+                    const localData = localStorage.getItem('uploads');
+                    allUploads = localData ? JSON.parse(localData) : [];
+                }
                 renderAdminView();
                 return allUploads;
             } catch (e) {
-                allUploads = [];
+                console.error('Load error:', e);
+                const localData = localStorage.getItem('uploads');
+                allUploads = localData ? JSON.parse(localData) : [];
                 renderAdminView();
                 return allUploads;
             }
         }
 
-        function saveUploads(data) {
-            try {
+        async function saveUploads(data) {
+            if (!githubToken) {
+                // Save to localStorage only
                 localStorage.setItem('uploads', JSON.stringify(data));
                 return true;
+            }
+
+            try {
+                // Get current file SHA
+                let sha = null;
+                const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/uploads.json`;
+                const checkResponse = await fetch(url, {
+                    headers: {
+                        'Authorization': `token ${githubToken}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (checkResponse.ok) {
+                    const info = await checkResponse.json();
+                    sha = info.sha;
+                }
+
+                const body = {
+                    message: `Update uploads - ${new Date().toISOString()}`,
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))),
+                    branch: CONFIG.branch
+                };
+                if (sha) body.sha = sha;
+
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${githubToken}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (response.ok) {
+                    // Also save to localStorage
+                    localStorage.setItem('uploads', JSON.stringify(data));
+                    return true;
+                } else {
+                    const error = await response.json();
+                    console.error('GitHub API error:', error);
+                    // Fallback to localStorage
+                    localStorage.setItem('uploads', JSON.stringify(data));
+                    showToast('Saved locally (GitHub sync failed)', 'error');
+                    return true;
+                }
             } catch (e) {
-                showToast('Error saving data', 'error');
-                return false;
+                console.error('Save error:', e);
+                localStorage.setItem('uploads', JSON.stringify(data));
+                return true;
             }
         }
 
@@ -601,9 +736,9 @@
                 };
 
                 // Load existing, add new, save
-                const existing = loadUploads();
+                const existing = await loadUploads();
                 existing.unshift(upload);
-                saveUploads(existing);
+                await saveUploads(existing);
 
                 // Reset form
                 selectedFiles = [];
@@ -617,7 +752,7 @@
                 
                 // Refresh admin view if logged in
                 if (isAdmin) {
-                    renderAdminView();
+                    await loadUploads();
                 }
             } catch (err) {
                 console.error(err);
@@ -744,7 +879,6 @@
                 downloadText += `Status: ${u.viewed ? 'Viewed' : 'Pending'}\n\n`;
             });
 
-            // Create download
             const blob = new Blob([downloadText], { type: 'text/plain' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
@@ -756,9 +890,15 @@
         }
 
         // ============================================================
-        //  INIT - Load data on page load
+        //  INIT
         // ============================================================
         window.onload = function() {
+            // Load saved token
+            const savedToken = localStorage.getItem('githubToken');
+            if (savedToken) {
+                githubToken = savedToken;
+                document.getElementById('tokenStatus').innerHTML = '✅ Token saved';
+            }
             loadUploads();
             console.log('📤 Customer Upload Portal loaded!');
             console.log(`📊 ${allUploads.length} uploads found`);
