@@ -381,10 +381,18 @@
         }
         .progress-bar .fill {
             height: 100%;
-            background: #48bb78;
+            background: linear-gradient(90deg, #667eea, #764ba2);
             width: 0%;
             transition: width 0.3s;
             border-radius: 3px;
+        }
+        .api-key-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-top: 8px;
         }
         @media (max-width: 600px) {
             .header h1 {
@@ -499,9 +507,18 @@
                         </div>
                     </div>
 
+                    <!-- IMGBB API Key Setup -->
                     <div class="data-info">
-                        <strong>💾 Data Storage:</strong> Uploads are saved in your browser (localStorage). 
-                        <span id="storageInfo"></span>
+                        <strong>🖼️ Image Hosting Setup (imgbb.com)</strong><br>
+                        To upload images to the cloud (unlimited storage), get your FREE API key:
+                        <ol style="margin:8px 0 8px 20px; font-size:13px;">
+                            <li>Go to <a href="https://api.imgbb.com/" target="_blank">api.imgbb.com</a></li>
+                            <li>Click "Get API Key" and sign up</li>
+                            <li>Copy your API key</li>
+                        </ol>
+                        <input type="password" id="imgbbApiKey" placeholder="Paste your imgbb API key here" class="api-key-input" />
+                        <button class="btn btn-primary" onclick="saveApiKey()" style="width:auto; padding:8px 20px; margin-top:8px;">💾 Save API Key</button>
+                        <div id="apiKeyStatus" style="margin-top:6px; font-size:13px;"></div>
                     </div>
 
                     <div class="stats" id="statsContainer"></div>
@@ -522,7 +539,8 @@
         //  CONFIGURATION - EDIT THIS!
         // ============================================================
         const CONFIG = {
-            adminPassword: 'admin123'  // CHANGE THIS PASSWORD!
+            adminPassword: 'Jumbo123',  // CHANGE THIS PASSWORD!
+            imgbbApiKey: '' // Will be loaded from localStorage
         };
 
         // ============================================================
@@ -532,6 +550,7 @@
         let userLocation = null;
         let allUploads = [];
         let isAdmin = false;
+        let imgbbApiKey = localStorage.getItem('imgbbApiKey') || '';
 
         // ============================================================
         //  UI FUNCTIONS
@@ -550,6 +569,9 @@
                     document.getElementById('adminLogin').style.display = 'none';
                     document.getElementById('adminDashboard').style.display = 'block';
                     loadUploads();
+                }
+                if (imgbbApiKey) {
+                    document.getElementById('apiKeyStatus').innerHTML = '✅ API Key saved';
                 }
             }
         }
@@ -640,7 +662,67 @@
             toast.className = `toast ${type}`;
             toast.textContent = msg;
             document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3500);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        // ============================================================
+        //  API KEY FUNCTIONS
+        // ============================================================
+        function saveApiKey() {
+            const key = document.getElementById('imgbbApiKey').value.trim();
+            if (key) {
+                imgbbApiKey = key;
+                localStorage.setItem('imgbbApiKey', key);
+                document.getElementById('apiKeyStatus').innerHTML = '✅ API Key saved!';
+                showToast('API Key saved successfully!');
+            } else {
+                showToast('Please paste a valid API key', 'error');
+            }
+        }
+
+        // ============================================================
+        //  IMAGE UPLOAD TO IMGBB
+        // ============================================================
+        async function uploadToImgbb(file) {
+            if (!imgbbApiKey) {
+                throw new Error('Please set your imgbb API key in Admin panel');
+            }
+
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const base64 = e.target.result.split(',')[1];
+                        const formData = new FormData();
+                        formData.append('key', imgbbApiKey);
+                        formData.append('image', base64);
+                        formData.append('name', file.name);
+
+                        const response = await fetch('https://api.imgbb.com/1/upload', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            resolve({
+                                name: file.name,
+                                type: file.type,
+                                size: file.size,
+                                url: data.data.url,
+                                thumb: data.data.thumb.url
+                            });
+                        } else {
+                            reject(new Error(data.error?.message || 'Upload failed'));
+                        }
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
         }
 
         // ============================================================
@@ -664,26 +746,13 @@
         });
 
         // ============================================================
-        //  STORAGE FUNCTIONS (localStorage with compression)
+        //  STORAGE FUNCTIONS
         // ============================================================
-        function getStorageSize() {
-            let total = 0;
-            for (let key in localStorage) {
-                if (localStorage.hasOwnProperty(key)) {
-                    total += localStorage[key].length * 2; // UTF-16
-                }
-            }
-            return total;
-        }
-
         function loadUploads() {
             try {
                 const data = localStorage.getItem('uploads');
                 allUploads = data ? JSON.parse(data) : [];
                 renderAdminView();
-                // Update storage info
-                const size = (getStorageSize() / 1024 / 1024).toFixed(2);
-                document.getElementById('storageInfo').textContent = `Used: ${size} MB of ~5 MB available.`;
                 return allUploads;
             } catch (e) {
                 allUploads = [];
@@ -694,26 +763,16 @@
 
         function saveUploads(data) {
             try {
-                // Check size before saving
-                const test = JSON.stringify(data);
-                if (test.length > 4.5 * 1024 * 1024) { // 4.5 MB limit
-                    showToast('Storage limit reached! Please download and clear old uploads.', 'warning');
-                    return false;
-                }
-                localStorage.setItem('uploads', test);
+                localStorage.setItem('uploads', JSON.stringify(data));
                 return true;
             } catch (e) {
-                if (e.name === 'QuotaExceededError') {
-                    showToast('Storage full! Please download and delete old uploads.', 'error');
-                } else {
-                    showToast('Error saving data: ' + e.message, 'error');
-                }
+                showToast('Error saving data: ' + e.message, 'error');
                 return false;
             }
         }
 
         // ============================================================
-        //  SUBMIT HANDLER - WITH PROPER ERROR HANDLING
+        //  SUBMIT HANDLER - WITH IMGBB UPLOAD
         // ============================================================
         async function handleSubmit(e) {
             e.preventDefault();
@@ -727,77 +786,78 @@
                 showToast('Please select at least one file', 'error');
                 return;
             }
+            if (!imgbbApiKey) {
+                showToast('⚠️ Admin needs to set up the API key first!', 'warning');
+                return;
+            }
 
             const btn = document.getElementById('submitBtn');
             const progressBar = document.getElementById('progressBar');
             const progressFill = document.getElementById('progressFill');
             
             btn.disabled = true;
-            btn.textContent = '⏳ Uploading...';
+            btn.textContent = '⏳ Uploading to Cloud...';
             progressBar.style.display = 'block';
             progressFill.style.width = '0%';
 
             try {
-                // Show progress
-                let processed = 0;
                 const totalFiles = selectedFiles.length;
+                const uploadedFiles = [];
 
-                // Compress images before storing
-                const fileData = await Promise.all(selectedFiles.map(async (f, index) => {
-                    let dataUrl;
+                // Upload each file to imgbb
+                for (let i = 0; i < selectedFiles.length; i++) {
+                    const file = selectedFiles[i];
                     
-                    // Compress images if they're large
-                    if (f.type.startsWith('image/') && f.size > 500 * 1024) {
+                    // Update progress
+                    const percent = ((i) / totalFiles) * 100;
+                    progressFill.style.width = percent + '%';
+                    btn.textContent = `⏳ Uploading ${i+1}/${totalFiles}...`;
+
+                    // For images, upload to imgbb
+                    if (file.type.startsWith('image/')) {
                         try {
-                            dataUrl = await compressImage(f, 1024, 0.7);
-                        } catch (e) {
-                            // If compression fails, use original
-                            dataUrl = await readFileAsDataURL(f);
+                            const result = await uploadToImgbb(file);
+                            uploadedFiles.push(result);
+                        } catch (err) {
+                            // If imgbb fails, store locally as fallback
+                            showToast(`Warning: ${file.name} stored locally`, 'warning');
+                            const dataUrl = await readFileAsDataURL(file);
+                            uploadedFiles.push({
+                                name: file.name,
+                                type: file.type,
+                                size: file.size,
+                                data: dataUrl,
+                                local: true
+                            });
                         }
                     } else {
-                        dataUrl = await readFileAsDataURL(f);
+                        // For non-images, store locally
+                        const dataUrl = await readFileAsDataURL(file);
+                        uploadedFiles.push({
+                            name: file.name,
+                            type: file.type,
+                            size: file.size,
+                            data: dataUrl,
+                            local: true
+                        });
                     }
-                    
-                    processed++;
-                    const percent = (processed / totalFiles) * 100;
-                    progressFill.style.width = percent + '%';
-                    
-                    return {
-                        name: f.name,
-                        type: f.type,
-                        size: f.size,
-                        data: dataUrl
-                    };
-                }));
+                }
+
+                progressFill.style.width = '100%';
+                btn.textContent = '✅ Saving...';
 
                 const upload = {
                     id: Date.now().toString(),
                     mobile: mobile,
-                    files: fileData,
+                    files: uploadedFiles,
                     location: userLocation,
                     timestamp: new Date().toISOString(),
                     viewed: false
                 };
 
-                // Check total size
-                const testData = [upload, ...allUploads];
-                const testString = JSON.stringify(testData);
-                if (testString.length > 4.5 * 1024 * 1024) {
-                    showToast('Storage limit reached! Please clear old uploads first.', 'warning');
-                    btn.disabled = false;
-                    btn.textContent = '🚀 Submit';
-                    progressBar.style.display = 'none';
-                    return;
-                }
-
-                // Load existing, add new, save
                 const existing = loadUploads();
                 existing.unshift(upload);
-                const saved = saveUploads(existing);
-                
-                if (!saved) {
-                    throw new Error('Failed to save data');
-                }
+                saveUploads(existing);
 
                 // Reset form
                 selectedFiles = [];
@@ -810,7 +870,6 @@
 
                 showToast('✅ Upload successful! Check Admin panel.');
                 
-                // Refresh admin view if logged in
                 if (isAdmin) {
                     renderAdminView();
                 }
@@ -831,38 +890,6 @@
                 const reader = new FileReader();
                 reader.onload = (e) => resolve(e.target.result);
                 reader.onerror = (e) => reject(e);
-                reader.readAsDataURL(file);
-            });
-        }
-
-        // Helper: Compress image
-        function compressImage(file, maxSize, quality) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        let width = img.width;
-                        let height = img.height;
-                        
-                        // Scale down if too large
-                        if (width > maxSize || height > maxSize) {
-                            const ratio = Math.min(maxSize / width, maxSize / height);
-                            width = Math.round(width * ratio);
-                            height = Math.round(height * ratio);
-                        }
-                        
-                        const canvas = document.createElement('canvas');
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        resolve(canvas.toDataURL('image/jpeg', quality));
-                    };
-                    img.onerror = reject;
-                    img.src = e.target.result;
-                };
-                reader.onerror = reject;
                 reader.readAsDataURL(file);
             });
         }
@@ -914,20 +941,23 @@
 
             container.innerHTML = filtered.map((u, index) => {
                 const filesHtml = u.files.map((f, i) => {
+                    // Check if it's an imgbb URL or local data
+                    const isImgbb = f.url && !f.local;
                     const isImage = f.type && f.type.startsWith('image/');
-                    const isVideo = f.type && f.type.startsWith('video/');
+                    const imageSrc = isImgbb ? f.url : (f.data || f.url);
                     
-                    if (isImage) {
+                    if (isImage && imageSrc) {
                         return `
-                            <div class="file-preview" onclick="openLightbox('${f.data}')">
-                                <img src="${f.data}" alt="${f.name}" />
+                            <div class="file-preview" onclick="openLightbox('${imageSrc}')">
+                                <img src="${imageSrc}" alt="${f.name}" />
                                 <div class="file-name">${f.name}</div>
                                 <div class="file-size">${(f.size/1024).toFixed(1)} KB</div>
+                                ${isImgbb ? '<div style="font-size:8px;color:#48bb78;">☁️ Cloud</div>' : ''}
                             </div>
                         `;
-                    } else if (isVideo) {
+                    } else if (f.type && f.type.startsWith('video/')) {
                         return `
-                            <div class="file-preview" onclick="window.open('${f.data}', '_blank')">
+                            <div class="file-preview" onclick="window.open('${imageSrc || f.data}', '_blank')">
                                 <div class="file-icon">🎬</div>
                                 <div class="file-name">${f.name}</div>
                                 <div class="file-size">${(f.size/1024).toFixed(1)} KB</div>
@@ -936,7 +966,7 @@
                     } else {
                         const icon = f.name && f.name.endsWith('.pdf') ? '📄' : '📝';
                         return `
-                            <div class="file-preview" onclick="window.open('${f.data}', '_blank')">
+                            <div class="file-preview" onclick="window.open('${f.data || f.url}', '_blank')">
                                 <div class="file-icon">${icon}</div>
                                 <div class="file-name">${f.name || 'File'}</div>
                                 <div class="file-size">${(f.size/1024).toFixed(1)} KB</div>
@@ -1002,7 +1032,8 @@
                 downloadText += `Location: ${u.location ? u.location.lat + ', ' + u.location.lng : 'Not shared'}\n`;
                 downloadText += `Files: ${u.files.length}\n`;
                 u.files.forEach(f => {
-                    downloadText += `  - ${f.name} (${(f.size/1024).toFixed(1)} KB)\n`;
+                    const url = f.url || f.data || 'No URL';
+                    downloadText += `  - ${f.name} (${(f.size/1024).toFixed(1)} KB) - ${url}\n`;
                 });
                 downloadText += `Status: ${u.viewed ? 'Viewed' : 'Pending'}\n\n`;
             });
@@ -1021,9 +1052,16 @@
         //  INIT
         // ============================================================
         window.onload = function() {
+            // Load saved API key
+            const savedKey = localStorage.getItem('imgbbApiKey');
+            if (savedKey) {
+                imgbbApiKey = savedKey;
+                document.getElementById('apiKeyStatus').innerHTML = '✅ API Key saved';
+            }
             loadUploads();
             console.log('📤 Customer Upload Portal loaded!');
             console.log(`📊 ${allUploads.length} uploads found`);
+            console.log(`🔑 API Key: ${imgbbApiKey ? '✅ Set' : '❌ Not set'}`);
         };
     </script>
 </body>
