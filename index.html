@@ -251,7 +251,7 @@
         //  🔑 CONFIGURATION - PUT YOUR API KEY HERE!
         // ============================================================
         // Get your FREE key from: https://api.imgbb.com/
-        const IMGBB_API_KEY = 'YOUR_IMGBB_API_KEY_HEREbb3fb10ee503d971c536d6dda8f2e735';  // ← PASTE YOUR KEY HERE!
+        const IMGBB_API_KEY = 'bb3fb10ee503d971c536d6dda8f2e735';
 
         // ============================================================
         //  APP STATE
@@ -351,7 +351,7 @@
         }
 
         // ============================================================
-        //  IMAGE UPLOAD TO IMGBB
+        //  UPLOAD TO IMGBB CLOUD (NO LOCAL STORAGE!)
         // ============================================================
         async function uploadToImgbb(file) {
             return new Promise((resolve, reject) => {
@@ -378,6 +378,7 @@
                                 size: file.size,
                                 url: data.data.url,
                                 thumb: data.data.thumb?.url || data.data.url,
+                                delete_url: data.data.delete_url,
                                 cloud: true
                             });
                         } else {
@@ -393,7 +394,7 @@
         }
 
         // ============================================================
-        //  STORAGE FUNCTIONS
+        //  STORAGE FUNCTIONS (ONLY STORES METADATA - NO BASE64!)
         // ============================================================
         function loadUploads() {
             try {
@@ -406,10 +407,20 @@
 
         function saveUploads(data) {
             try {
-                localStorage.setItem('uploads', JSON.stringify(data));
+                // Check data size before saving
+                const test = JSON.stringify(data);
+                if (test.length > 4 * 1024 * 1024) {
+                    showToast('⚠️ Storage limit reached! Please download and clear old uploads.', 'warning');
+                    return false;
+                }
+                localStorage.setItem('uploads', test);
                 return true;
             } catch (e) {
-                showToast('Error saving data: ' + e.message, 'error');
+                if (e.name === 'QuotaExceededError') {
+                    showToast('❌ Storage full! Please clear old uploads.', 'error');
+                } else {
+                    showToast('Error saving: ' + e.message, 'error');
+                }
                 return false;
             }
         }
@@ -430,12 +441,18 @@
                 return;
             }
 
+            if (!IMGBB_API_KEY || IMGBB_API_KEY === 'bb3fb10ee503d971c536d6dda8f2e735') {
+                showToast('⚠️ System configuration error. Please contact support.', 'error');
+                console.error('API key not set!');
+                return;
+            }
+
             const btn = document.getElementById('submitBtn');
             const progressBar = document.getElementById('progressBar');
             const progressFill = document.getElementById('progressFill');
             
             btn.disabled = true;
-            btn.textContent = '⏳ Uploading...';
+            btn.textContent = '⏳ Uploading to Cloud...';
             progressBar.style.display = 'block';
             progressFill.style.width = '0%';
 
@@ -443,6 +460,7 @@
                 const totalFiles = selectedFiles.length;
                 const uploadedFiles = [];
 
+                // Upload each file to imgbb
                 for (let i = 0; i < selectedFiles.length; i++) {
                     const file = selectedFiles[i];
                     
@@ -451,20 +469,11 @@
                     btn.textContent = `⏳ Uploading ${i+1}/${totalFiles}...`;
 
                     if (file.type.startsWith('image/')) {
-                        try {
-                            const result = await uploadToImgbb(file);
-                            uploadedFiles.push(result);
-                        } catch (err) {
-                            const dataUrl = await readFileAsDataURL(file);
-                            uploadedFiles.push({
-                                name: file.name,
-                                type: file.type,
-                                size: file.size,
-                                data: dataUrl,
-                                cloud: false
-                            });
-                        }
+                        // Upload images to imgbb
+                        const result = await uploadToImgbb(file);
+                        uploadedFiles.push(result);
                     } else {
+                        // For non-images, store as base64 (these are usually small)
                         const dataUrl = await readFileAsDataURL(file);
                         uploadedFiles.push({
                             name: file.name,
@@ -488,9 +497,15 @@
                     viewed: false
                 };
 
+                // Load existing and add new upload
                 const existing = loadUploads();
                 existing.unshift(upload);
-                saveUploads(existing);
+                
+                // Save only if within limit
+                const saved = saveUploads(existing);
+                if (!saved) {
+                    throw new Error('Storage limit reached');
+                }
 
                 // Reset form
                 selectedFiles = [];
@@ -504,7 +519,7 @@
                 showToast('✅ Upload successful! Thank you.');
             } catch (err) {
                 console.error('Upload error:', err);
-                showToast('Upload failed. Please try again.', 'error');
+                showToast('❌ Upload failed: ' + err.message, 'error');
             } finally {
                 btn.disabled = false;
                 btn.textContent = '🚀 Submit';
@@ -528,7 +543,10 @@
         window.onload = function() {
             console.log('📤 Customer Upload Portal loaded!');
             if (!IMGBB_API_KEY || IMGBB_API_KEY === 'bb3fb10ee503d971c536d6dda8f2e735') {
-                console.warn('⚠️ Please set your imgbb API key in the code!');
+                console.warn('⚠️ Please set your imgbb API key!');
+                showToast('⚠️ System configuration: API key missing', 'warning');
+            } else {
+                console.log('✅ API key configured');
             }
         };
     </script>
