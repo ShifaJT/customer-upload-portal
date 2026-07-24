@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Admin Dashboard - Upload Portal</title>
+    <title>Customer Upload Portal</title>
     <style>
         * {
             margin: 0;
@@ -16,11 +16,11 @@
             padding: 16px;
         }
         .container {
-            max-width: 1000px;
+            max-width: 600px;
             margin: 0 auto;
         }
         .header {
-            background: linear-gradient(135deg, #fc8181, #9b2c2c);
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             padding: 30px 20px;
             border-radius: 12px;
@@ -42,6 +42,66 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-bottom: 20px;
         }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #2d3748;
+            font-size: 14px;
+        }
+        .form-group input[type="tel"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .file-drop {
+            border: 2px dashed #e2e8f0;
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+        .file-drop:hover {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+        .file-drop input[type="file"] {
+            display: block;
+            margin: 10px auto;
+            width: 100%;
+            max-width: 300px;
+        }
+        .file-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .file-tag {
+            background: #edf2f7;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .file-tag .remove {
+            color: #fc8181;
+            cursor: pointer;
+            font-weight: bold;
+        }
         .btn {
             padding: 12px 24px;
             border: none;
@@ -51,180 +111,29 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-        .btn-danger {
-            background: #fc8181;
-            color: white;
-        }
-        .btn-danger:hover {
-            background: #f56565;
-        }
-        .btn-success {
-            background: #48bb78;
-            color: white;
-        }
-        .btn-success:hover {
-            background: #38a169;
-        }
         .btn-primary {
             background: #667eea;
             color: white;
+            width: 100%;
         }
         .btn-primary:hover {
             background: #5a67d8;
+            transform: translateY(-1px);
         }
-        .admin-login {
-            max-width: 400px;
-            margin: 40px auto;
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
-        .admin-login input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 16px;
-            margin-bottom: 15px;
-        }
-        .admin-login input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        .upload-item {
-            border-left: 4px solid #667eea;
-            padding: 16px;
-            margin-bottom: 14px;
-            background: #f7fafc;
-            border-radius: 8px;
-        }
-        .upload-item .meta {
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-        .upload-item .mobile {
-            font-weight: 600;
-            font-size: 16px;
-        }
-        .upload-item .time {
-            color: #718096;
-            font-size: 13px;
-        }
-        .upload-item .files {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin: 10px 0;
-        }
-        .upload-item .file-preview {
-            background: white;
-            padding: 8px;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-            text-align: center;
-            width: 130px;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-        }
-        .upload-item .file-preview:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        .upload-item .file-preview img {
-            width: 110px;
-            height: 110px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
-        .upload-item .file-preview .file-icon {
-            font-size: 50px;
-            padding: 20px 0;
-        }
-        .upload-item .file-preview .file-name {
-            font-size: 11px;
-            color: #4a5568;
-            margin-top: 4px;
-            word-break: break-all;
-            max-height: 30px;
-            overflow: hidden;
-        }
-        .upload-item .file-preview .file-size {
-            font-size: 10px;
-            color: #a0aec0;
-        }
-        .upload-item .file-preview .cloud-badge {
-            position: absolute;
-            top: 4px;
-            right: 4px;
+        .location-btn {
             background: #48bb78;
             color: white;
-            font-size: 8px;
-            padding: 2px 6px;
-            border-radius: 10px;
-        }
-        .badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .badge-pending {
-            background: #fefcbf;
-            color: #975a16;
-        }
-        .badge-viewed {
-            background: #c6f6d5;
-            color: #22543d;
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .stat-card {
-            background: #f7fafc;
-            padding: 14px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .stat-card .number {
-            font-size: 24px;
-            font-weight: bold;
-            color: #667eea;
-        }
-        .stat-card .label {
-            font-size: 12px;
-            color: #718096;
-        }
-        .filter-box {
-            margin: 15px 0;
-        }
-        .filter-box input {
-            width: 100%;
-            max-width: 300px;
-            padding: 10px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #718096;
-        }
-        .download-all {
-            background: #48bb78;
-            color: white;
+            padding: 10px 20px;
             border: none;
-            padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
-            margin-bottom: 15px;
         }
-        .download-all:hover {
+        .location-btn:hover {
             background: #38a169;
         }
         .toast {
@@ -242,6 +151,9 @@
         .toast.error {
             background: #fc8181;
         }
+        .toast.warning {
+            background: #ed8936;
+        }
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
@@ -252,60 +164,30 @@
                 opacity: 1;
             }
         }
-        .lightbox {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
+        .progress-bar {
             width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        .progress-bar .fill {
             height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s;
+            border-radius: 3px;
         }
-        .lightbox.active {
-            display: flex;
-        }
-        .lightbox img {
-            max-width: 90%;
-            max-height: 90%;
-            object-fit: contain;
-        }
-        .lightbox .close {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            color: white;
-            font-size: 40px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .lightbox .close:hover {
-            color: #fc8181;
-        }
-        .admin-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-        }
-        .admin-actions .btn {
-            width: auto;
-            padding: 8px 16px;
-            font-size: 14px;
+        .footer {
+            text-align: center;
+            color: #a0aec0;
+            font-size: 12px;
+            margin-top: 20px;
         }
         @media (max-width: 600px) {
             .header h1 {
                 font-size: 22px;
-            }
-            .upload-item .file-preview {
-                width: 90px;
-            }
-            .upload-item .file-preview img {
-                width: 70px;
-                height: 70px;
             }
         }
     </style>
@@ -313,109 +195,202 @@
 <body>
     <div class="container">
 
-        <!-- LIGHTBOX -->
-        <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-            <span class="close">&times;</span>
-            <img id="lightboxImg" src="" alt="Preview" />
+        <div class="header">
+            <h1>📤 Customer Upload Portal</h1>
+            <p>Upload images, videos, documents with location</p>
         </div>
 
-        <!-- ADMIN LOGIN -->
-        <div id="loginScreen">
-            <div class="header">
-                <h1>🔐 Admin Dashboard</h1>
-                <p>Secure access to all customer uploads</p>
-            </div>
-            <div class="card admin-login">
-                <h3 style="text-align:center; margin-bottom:20px;">Enter Admin Password</h3>
-                <input type="password" id="adminPassword" placeholder="Enter admin password" />
-                <button class="btn btn-primary" onclick="adminLogin()" style="width:100%;">Login</button>
-            </div>
-        </div>
+        <div class="card">
+            <form id="uploadForm" onsubmit="handleSubmit(event)">
+                <div class="form-group">
+                    <label>📱 Mobile Number *</label>
+                    <input type="tel" id="mobile" placeholder="Enter 10-digit mobile number" 
+                           pattern="[0-9]{10}" required />
+                </div>
 
-        <!-- ADMIN DASHBOARD -->
-        <div id="dashboardScreen" style="display:none;">
-            <div class="header">
-                <h1>📋 Admin Dashboard</h1>
-                <p>Manage all customer uploads</p>
-            </div>
-
-            <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:20px;">
-                    <h3>All Uploads</h3>
-                    <div class="admin-actions">
-                        <button class="download-all" onclick="downloadAllFiles()">📥 Download All</button>
-                        <button class="btn btn-danger" onclick="adminLogout()" style="width:auto; padding:8px 20px;">🚪 Logout</button>
+                <div class="form-group">
+                    <label>📎 Upload Files *</label>
+                    <div class="file-drop">
+                        <div style="font-size: 40px;">📁</div>
+                        <div style="font-weight: 500;">Click to select files</div>
+                        <div style="font-size: 13px; color: #718096; margin-top: 6px;">
+                            Images, Videos, PDF, Word (Max 25MB each)
+                        </div>
+                        <input type="file" id="fileInput" multiple 
+                               accept="image/*,video/*,.pdf,.doc,.docx" />
                     </div>
+                    <div id="fileList" class="file-list"></div>
+                    <div id="fileCount" style="font-size: 12px; color: #718096; margin-top: 5px;"></div>
                 </div>
 
-                <div class="stats" id="statsContainer"></div>
-
-                <div class="filter-box">
-                    <input type="text" id="filterMobile" placeholder="🔍 Filter by mobile number..." 
-                           oninput="renderAdminView()" />
+                <div class="form-group">
+                    <label>📍 Location (Optional)</label>
+                    <button type="button" class="location-btn" onclick="getLocation()">
+                        📍 Share My Location
+                    </button>
+                    <div id="locationDisplay" style="margin-top: 8px; font-size: 14px; color: #4a5568;"></div>
                 </div>
 
-                <div id="uploadsList"></div>
-            </div>
+                <div class="progress-bar" id="progressBar" style="display:none;">
+                    <div class="fill" id="progressFill"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    🚀 Submit
+                </button>
+            </form>
+        </div>
+
+        <div class="footer">
+            Powered by Secure Upload Portal
         </div>
     </div>
 
     <script>
         // ============================================================
-        //  🔐 CONFIGURATION - EDIT THIS!
+        //  🔑 CONFIGURATION - PUT YOUR API KEY HERE!
         // ============================================================
-        const CONFIG = {
-            adminPassword: 'admin123'  // CHANGE THIS PASSWORD!
-        };
+        // Get your FREE key from: https://api.imgbb.com/
+        const IMGBB_API_KEY = 'YOUR_IMGBB_API_KEY_HEREbb3fb10ee503d971c536d6dda8f2e735';  // ← PASTE YOUR KEY HERE!
 
         // ============================================================
         //  APP STATE
         // ============================================================
-        let allUploads = [];
-        let isAdmin = false;
+        let selectedFiles = [];
+        let userLocation = null;
 
         // ============================================================
-        //  AUTH FUNCTIONS
+        //  UI FUNCTIONS
         // ============================================================
-        function adminLogin() {
-            const pwd = document.getElementById('adminPassword').value;
-            if (pwd === CONFIG.adminPassword) {
-                isAdmin = true;
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('dashboardScreen').style.display = 'block';
-                loadUploads();
-                showToast('✅ Logged in successfully!');
-            } else {
-                showToast('❌ Wrong password!', 'error');
-            }
-        }
-
-        function adminLogout() {
-            isAdmin = false;
-            document.getElementById('loginScreen').style.display = 'block';
-            document.getElementById('dashboardScreen').style.display = 'none';
-            document.getElementById('adminPassword').value = '';
-        }
-
-        // ============================================================
-        //  LIGHTBOX FUNCTIONS
-        // ============================================================
-        function openLightbox(imageUrl) {
-            const lightbox = document.getElementById('lightbox');
-            const img = document.getElementById('lightboxImg');
-            img.src = imageUrl;
-            lightbox.classList.add('active');
-        }
-
-        function closeLightbox() {
-            document.getElementById('lightbox').classList.remove('active');
-        }
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeLightbox();
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const files = this.files;
+            if (files.length > 0) {
+                handleFiles(files);
             }
         });
+
+        function handleFiles(files) {
+            const validFiles = [];
+            for (let f of files) {
+                const isValidType = f.type.startsWith('image/') || 
+                                   f.type.startsWith('video/') || 
+                                   f.name.endsWith('.pdf') || 
+                                   f.name.endsWith('.doc') || 
+                                   f.name.endsWith('.docx');
+                const isValidSize = f.size <= 25 * 1024 * 1024;
+                if (isValidType && isValidSize) {
+                    validFiles.push(f);
+                }
+            }
+            if (validFiles.length !== files.length) {
+                showToast('Some files were skipped. Only images, videos, PDFs, and Word docs under 25MB allowed.', 'error');
+            }
+            selectedFiles = [...selectedFiles, ...validFiles];
+            renderFileList();
+        }
+
+        function renderFileList() {
+            const container = document.getElementById('fileList');
+            const countDisplay = document.getElementById('fileCount');
+            if (selectedFiles.length === 0) {
+                container.innerHTML = '';
+                countDisplay.textContent = '';
+                return;
+            }
+            container.innerHTML = selectedFiles.map((f, i) => `
+                <span class="file-tag">
+                    📎 ${f.name} (${(f.size/1024).toFixed(1)} KB)
+                    <span class="remove" onclick="removeFile(${i})">✕</span>
+                </span>
+            `).join('');
+            countDisplay.textContent = `${selectedFiles.length} file(s) selected (${(selectedFiles.reduce((a,b) => a + b.size, 0)/1024/1024).toFixed(1)} MB total)`;
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            renderFileList();
+        }
+
+        function getLocation() {
+            if (!navigator.geolocation) {
+                showToast('Geolocation not supported by this browser', 'error');
+                document.getElementById('locationDisplay').innerHTML = '❌ Geolocation not supported';
+                return;
+            }
+            
+            document.getElementById('locationDisplay').innerHTML = '⏳ Getting location...';
+            
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    userLocation = {
+                        lat: pos.coords.latitude,
+                        lng: pos.coords.longitude
+                    };
+                    document.getElementById('locationDisplay').innerHTML = 
+                        `✅ Location: ${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}`;
+                    showToast('📍 Location shared successfully!');
+                },
+                (error) => {
+                    console.error('Location error:', error);
+                    let msg = 'Unable to get location. ';
+                    if (error.code === 1) msg += 'Please allow location access.';
+                    else if (error.code === 2) msg += 'Location unavailable.';
+                    else if (error.code === 3) msg += 'Location request timed out.';
+                    showToast(msg, 'error');
+                    document.getElementById('locationDisplay').innerHTML = `❌ ${msg}`;
+                }
+            );
+        }
+
+        function showToast(msg, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        // ============================================================
+        //  IMAGE UPLOAD TO IMGBB
+        // ============================================================
+        async function uploadToImgbb(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const base64 = e.target.result.split(',')[1];
+                        const formData = new FormData();
+                        formData.append('key', IMGBB_API_KEY);
+                        formData.append('image', base64);
+                        formData.append('name', file.name);
+
+                        const response = await fetch('https://api.imgbb.com/1/upload', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            resolve({
+                                name: file.name,
+                                type: file.type,
+                                size: file.size,
+                                url: data.data.url,
+                                thumb: data.data.thumb?.url || data.data.url,
+                                cloud: true
+                            });
+                        } else {
+                            reject(new Error(data.error?.message || 'Upload failed'));
+                        }
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
 
         // ============================================================
         //  STORAGE FUNCTIONS
@@ -423,13 +398,9 @@
         function loadUploads() {
             try {
                 const data = localStorage.getItem('uploads');
-                allUploads = data ? JSON.parse(data) : [];
-                renderAdminView();
-                return allUploads;
+                return data ? JSON.parse(data) : [];
             } catch (e) {
-                allUploads = [];
-                renderAdminView();
-                return allUploads;
+                return [];
             }
         }
 
@@ -444,162 +415,121 @@
         }
 
         // ============================================================
-        //  ADMIN VIEW
+        //  SUBMIT HANDLER
         // ============================================================
-        function renderAdminView() {
-            const filter = document.getElementById('filterMobile').value.trim().toLowerCase();
-            let filtered = allUploads;
-            if (filter) {
-                filtered = allUploads.filter(u => u.mobile.includes(filter));
+        async function handleSubmit(e) {
+            e.preventDefault();
+
+            const mobile = document.getElementById('mobile').value.trim();
+            if (!mobile || mobile.length !== 10) {
+                showToast('Please enter a valid 10-digit mobile number', 'error');
+                return;
             }
-
-            const total = allUploads.length;
-            const pending = allUploads.filter(u => !u.viewed).length;
-            const viewed = allUploads.filter(u => u.viewed).length;
-            document.getElementById('statsContainer').innerHTML = `
-                <div class="stat-card"><div class="number">${total}</div><div class="label">Total</div></div>
-                <div class="stat-card"><div class="number">${pending}</div><div class="label">Pending</div></div>
-                <div class="stat-card"><div class="number">${viewed}</div><div class="label">Viewed</div></div>
-            `;
-
-            const container = document.getElementById('uploadsList');
-            if (filtered.length === 0) {
-                container.innerHTML = `<div class="empty-state">📭 No uploads found</div>`;
+            if (selectedFiles.length === 0) {
+                showToast('Please select at least one file', 'error');
                 return;
             }
 
-            container.innerHTML = filtered.map((u, index) => {
-                const filesHtml = u.files.map((f, i) => {
-                    const isImage = f.type && f.type.startsWith('image/');
+            const btn = document.getElementById('submitBtn');
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ Uploading...';
+            progressBar.style.display = 'block';
+            progressFill.style.width = '0%';
+
+            try {
+                const totalFiles = selectedFiles.length;
+                const uploadedFiles = [];
+
+                for (let i = 0; i < selectedFiles.length; i++) {
+                    const file = selectedFiles[i];
                     
-                    let imageSrc = null;
-                    if (f.cloud && f.url) {
-                        imageSrc = f.url;
-                    } else if (f.display_url) {
-                        imageSrc = f.display_url;
-                    } else if (f.data) {
-                        imageSrc = f.data;
-                    } else if (f.url) {
-                        imageSrc = f.url;
-                    }
-                    
-                    if (isImage && imageSrc) {
-                        return `
-                            <div class="file-preview" onclick="openLightbox('${imageSrc}')">
-                                <img src="${imageSrc}" alt="${f.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23f0f2f5%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2230%22%3E🖼️%3C/text%3E%3C/svg%3E'" />
-                                <div class="file-name">${f.name}</div>
-                                <div class="file-size">${(f.size/1024).toFixed(1)} KB</div>
-                                ${f.cloud ? '<div class="cloud-badge">☁️</div>' : ''}
-                            </div>
-                        `;
-                    } else if (f.type && f.type.startsWith('video/')) {
-                        const src = f.url || f.data || '';
-                        return `
-                            <div class="file-preview" onclick="window.open('${src}', '_blank')">
-                                <div class="file-icon">🎬</div>
-                                <div class="file-name">${f.name}</div>
-                                <div class="file-size">${(f.size/1024).toFixed(1)} KB</div>
-                            </div>
-                        `;
+                    const percent = ((i) / totalFiles) * 100;
+                    progressFill.style.width = percent + '%';
+                    btn.textContent = `⏳ Uploading ${i+1}/${totalFiles}...`;
+
+                    if (file.type.startsWith('image/')) {
+                        try {
+                            const result = await uploadToImgbb(file);
+                            uploadedFiles.push(result);
+                        } catch (err) {
+                            const dataUrl = await readFileAsDataURL(file);
+                            uploadedFiles.push({
+                                name: file.name,
+                                type: file.type,
+                                size: file.size,
+                                data: dataUrl,
+                                cloud: false
+                            });
+                        }
                     } else {
-                        const icon = f.name && f.name.endsWith('.pdf') ? '📄' : '📝';
-                        const src = f.url || f.data || '';
-                        return `
-                            <div class="file-preview" onclick="window.open('${src}', '_blank')">
-                                <div class="file-icon">${icon}</div>
-                                <div class="file-name">${f.name || 'File'}</div>
-                                <div class="file-size">${(f.size/1024).toFixed(1)} KB</div>
-                            </div>
-                        `;
+                        const dataUrl = await readFileAsDataURL(file);
+                        uploadedFiles.push({
+                            name: file.name,
+                            type: file.type,
+                            size: file.size,
+                            data: dataUrl,
+                            cloud: false
+                        });
                     }
-                }).join('');
+                }
 
-                const locationHtml = u.location ? 
-                    `📍 ${u.location.lat.toFixed(4)}, ${u.location.lng.toFixed(4)}` : 
-                    '📍 Not shared';
+                progressFill.style.width = '100%';
+                btn.textContent = '✅ Saving...';
 
-                const badgeClass = u.viewed ? 'badge-viewed' : 'badge-pending';
-                const badgeText = u.viewed ? '✅ Viewed' : '⏳ Pending';
+                const upload = {
+                    id: Date.now().toString(),
+                    mobile: mobile,
+                    files: uploadedFiles,
+                    location: userLocation,
+                    timestamp: new Date().toISOString(),
+                    viewed: false
+                };
 
-                return `
-                    <div class="upload-item">
-                        <div class="meta">
-                            <span class="mobile">📱 ${u.mobile}</span>
-                            <span class="time">${new Date(u.timestamp).toLocaleString()}</span>
-                            <span class="badge ${badgeClass}">${badgeText}</span>
-                        </div>
-                        <div style="font-size:13px; color:#4a5568;">${locationHtml}</div>
-                        <div class="files">${filesHtml}</div>
-                        <div style="margin-top:8px;">
-                            ${!u.viewed ? `<button class="btn btn-success" style="width:auto; padding:6px 16px; font-size:13px;" onclick="markViewed('${u.id}')">✅ Mark as Viewed</button>` : ''}
-                            <button class="btn btn-danger" style="width:auto; padding:6px 16px; font-size:13px; margin-left:6px;" onclick="deleteUpload('${u.id}')">🗑️ Delete</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
+                const existing = loadUploads();
+                existing.unshift(upload);
+                saveUploads(existing);
 
-        function markViewed(id) {
-            const upload = allUploads.find(u => u.id === id);
-            if (upload) {
-                upload.viewed = true;
-                saveUploads(allUploads);
-                renderAdminView();
-                showToast('✅ Marked as viewed');
+                // Reset form
+                selectedFiles = [];
+                userLocation = null;
+                document.getElementById('mobile').value = '';
+                document.getElementById('fileList').innerHTML = '';
+                document.getElementById('fileCount').textContent = '';
+                document.getElementById('locationDisplay').innerHTML = '';
+                document.getElementById('fileInput').value = '';
+
+                showToast('✅ Upload successful! Thank you.');
+            } catch (err) {
+                console.error('Upload error:', err);
+                showToast('Upload failed. Please try again.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🚀 Submit';
+                progressBar.style.display = 'none';
+                progressFill.style.width = '0%';
             }
         }
 
-        function deleteUpload(id) {
-            if (!confirm('Delete this upload?')) return;
-            allUploads = allUploads.filter(u => u.id !== id);
-            saveUploads(allUploads);
-            renderAdminView();
-            showToast('🗑️ Deleted');
-        }
-
-        function downloadAllFiles() {
-            if (allUploads.length === 0) {
-                showToast('No files to download', 'error');
-                return;
-            }
-            
-            let downloadText = '===== CUSTOMER UPLOADS =====\n\n';
-            allUploads.forEach((u, index) => {
-                downloadText += `--- Upload ${index + 1} ---\n`;
-                downloadText += `Mobile: ${u.mobile}\n`;
-                downloadText += `Date: ${new Date(u.timestamp).toLocaleString()}\n`;
-                downloadText += `Location: ${u.location ? u.location.lat + ', ' + u.location.lng : 'Not shared'}\n`;
-                downloadText += `Files: ${u.files.length}\n`;
-                u.files.forEach(f => {
-                    const url = f.url || f.data || 'No URL';
-                    downloadText += `  - ${f.name} (${(f.size/1024).toFixed(1)} KB) - ${url}\n`;
-                });
-                downloadText += `Status: ${u.viewed ? 'Viewed' : 'Pending'}\n\n`;
+        function readFileAsDataURL(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(e);
+                reader.readAsDataURL(file);
             });
-
-            const blob = new Blob([downloadText], { type: 'text/plain' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `uploads_${new Date().toISOString().slice(0,10)}.txt`;
-            link.click();
-            URL.revokeObjectURL(link.href);
-            
-            showToast('📥 Download started!');
-        }
-
-        function showToast(msg, type = 'success') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = msg;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 4000);
         }
 
         // ============================================================
         //  INIT
         // ============================================================
         window.onload = function() {
-            console.log('🔐 Admin Dashboard loaded!');
+            console.log('📤 Customer Upload Portal loaded!');
+            if (!IMGBB_API_KEY || IMGBB_API_KEY === 'bb3fb10ee503d971c536d6dda8f2e735') {
+                console.warn('⚠️ Please set your imgbb API key in the code!');
+            }
         };
     </script>
 </body>
