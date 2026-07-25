@@ -14,7 +14,7 @@
             color: #1a202c;
         }
         .container {
-            max-width: 1200px;
+            max-width: 800px;
             margin: 0 auto;
         }
         
@@ -75,6 +75,21 @@
             justify-content: center;
             font-weight: 600;
             font-size: 14px;
+        }
+        
+        /* ===== NHT BANNER ===== */
+        .nht-banner {
+            background: #1a3c2a;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 13px;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+        .nht-banner span {
+            color: #d4a843;
         }
         
         /* ===== HERO ===== */
@@ -153,99 +168,6 @@
         }
         .access-section .url-box .copy-btn:hover {
             background: #2d5a42;
-        }
-        
-        /* ===== TEMPLATES ===== */
-        .section-title {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        .section-title h2 {
-            color: #1a3c2a;
-            font-size: 20px;
-            font-weight: 600;
-        }
-        .section-title .see-all {
-            color: #1a3c2a;
-            font-size: 14px;
-            cursor: pointer;
-            opacity: 0.7;
-        }
-        .section-title .see-all:hover {
-            opacity: 1;
-        }
-        
-        .templates-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 12px;
-            margin-bottom: 30px;
-        }
-        .template-card {
-            background: white;
-            border: 1px solid #e8edea;
-            border-radius: 10px;
-            padding: 16px 12px;
-            text-align: center;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-        .template-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-            border-color: #d4a843;
-        }
-        .template-card .number {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1a3c2a;
-        }
-        .template-card .label {
-            font-size: 12px;
-            color: #718096;
-            margin-top: 4px;
-        }
-        .template-card.active {
-            border-color: #d4a843;
-            background: #fcf8f0;
-        }
-        .template-card.active .number {
-            color: #d4a843;
-        }
-        
-        /* ===== ELEMENTS MENU ===== */
-        .elements-menu {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 25px;
-            padding: 16px 0;
-            border-top: 1px solid #e8edea;
-            border-bottom: 1px solid #e8edea;
-        }
-        .element-item {
-            padding: 8px 18px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: #4a5568;
-            background: transparent;
-            border: 1px solid transparent;
-        }
-        .element-item:hover {
-            background: #e8edea;
-            color: #1a3c2a;
-        }
-        .element-item.active {
-            background: #1a3c2a;
-            color: white;
-        }
-        .element-item .icon {
-            margin-right: 6px;
         }
         
         /* ===== UPLOAD FORM ===== */
@@ -358,13 +280,6 @@
             transform: none;
             box-shadow: none;
         }
-        .btn-secondary {
-            background: #1a3c2a;
-            color: white;
-            width: auto;
-            padding: 10px 20px;
-        }
-        .btn-secondary:hover { background: #2d5a42; }
         .location-btn {
             background: #1a3c2a;
             color: white;
@@ -428,29 +343,12 @@
             to { opacity: 1; transform: translate(-50%, 0); }
         }
         
-        /* ===== NHT BANNER ===== */
-        .nht-banner {
-            background: #1a3c2a;
-            color: white;
-            padding: 8px 20px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 13px;
-            margin-bottom: 20px;
-            letter-spacing: 1px;
-        }
-        .nht-banner span {
-            color: #d4a843;
-        }
-        
         @media (max-width: 768px) {
             .hero { padding: 30px 24px; }
             .hero h1 { font-size: 24px; }
             .top-bar { flex-direction: column; align-items: stretch; text-align: center; }
             .logo-area { justify-content: center; }
             .user-area { justify-content: center; }
-            .templates-grid { grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); }
-            .elements-menu { justify-content: center; }
         }
     </style>
 </head>
@@ -488,33 +386,6 @@
                 <span class="url">https://shifajt.github.io/customer-upload-portal/</span>
                 <button class="copy-btn" onclick="copyURL()">📋 Copy</button>
             </div>
-        </div>
-
-        <!-- ===== TEMPLATES ===== -->
-        <div class="section-title">
-            <h2>📋 Templates</h2>
-            <span class="see-all">View All →</span>
-        </div>
-        <div class="templates-grid" id="templatesGrid">
-            <div class="template-card active"><div class="number">1</div><div class="label">Upload</div></div>
-            <div class="template-card"><div class="number">2</div><div class="label">Documents</div></div>
-            <div class="template-card"><div class="number">3</div><div class="label">Images</div></div>
-            <div class="template-card"><div class="number">4</div><div class="label">Videos</div></div>
-            <div class="template-card"><div class="number">5</div><div class="label">Reports</div></div>
-            <div class="template-card"><div class="number">6</div><div class="label">Forms</div></div>
-            <div class="template-card"><div class="number">7</div><div class="label">Invoices</div></div>
-            <div class="template-card"><div class="number">8</div><div class="label">Contracts</div></div>
-            <div class="template-card"><div class="number">9</div><div class="label">Receipts</div></div>
-            <div class="template-card"><div class="number">10</div><div class="label">Others</div></div>
-        </div>
-
-        <!-- ===== ELEMENTS MENU ===== -->
-        <div class="elements-menu">
-            <div class="element-item active"><span class="icon">📝</span>Text</div>
-            <div class="element-item"><span class="icon">🏷️</span>Brand</div>
-            <div class="element-item"><span class="icon">📤</span>Uploads</div>
-            <div class="element-item"><span class="icon">🔧</span>Tools</div>
-            <div class="element-item"><span class="icon">📁</span>Projects</div>
         </div>
 
         <!-- ===== UPLOAD FORM ===== -->
@@ -673,7 +544,6 @@
             navigator.clipboard.writeText(url).then(() => {
                 showToast('✅ URL copied to clipboard!');
             }).catch(() => {
-                // Fallback
                 const input = document.createElement('input');
                 input.value = url;
                 document.body.appendChild(input);
@@ -891,30 +761,6 @@
                 reader.readAsDataURL(file);
             });
         }
-
-        // ============================================================
-        //  TEMPLATE CLICK
-        // ============================================================
-        document.querySelectorAll('.template-card').forEach(card => {
-            card.addEventListener('click', function() {
-                document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
-                const num = this.querySelector('.number').textContent;
-                showToast(`📋 Template ${num} selected`);
-            });
-        });
-
-        // ============================================================
-        //  ELEMENTS CLICK
-        // ============================================================
-        document.querySelectorAll('.element-item').forEach(item => {
-            item.addEventListener('click', function() {
-                document.querySelectorAll('.element-item').forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
-                const text = this.textContent.trim();
-                showToast(`🔧 ${text} selected`);
-            });
-        });
 
         window.onload = function() {
             console.log('🌿 Jumbotail Customer Portal loaded!');
