@@ -209,14 +209,6 @@
             color: white;
         }
         .btn-secondary:hover { background: #2d5a42; }
-        .btn-download {
-            background: #3182ce;
-            color: white;
-            padding: 6px 14px;
-            font-size: 13px;
-            width: auto;
-        }
-        .btn-download:hover { background: #2b6cb0; }
         .location-btn {
             background: #1a3c2a;
             color: white;
@@ -280,49 +272,61 @@
         .shared-item .files {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
             margin-top: 8px;
         }
-        .shared-item .file-item {
+        .shared-item .file-card {
             background: white;
-            padding: 8px 14px;
+            padding: 10px;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            text-align: center;
+            width: 130px;
             transition: all 0.2s;
         }
-        .shared-item .file-item:hover {
-            background: #f0f5f2;
-            border-color: #1a3c2a;
+        .shared-item .file-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         }
-        .shared-item .file-item .file-name {
-            font-size: 13px;
-            color: #1a3c2a;
-            word-break: break-all;
+        .shared-item .file-card img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid #e8edea;
         }
-        .shared-item .file-item .file-size {
+        .shared-item .file-card .file-icon {
+            font-size: 50px;
+            padding: 20px 0;
+        }
+        .shared-item .file-card .file-name {
             font-size: 11px;
+            color: #4a5568;
+            margin-top: 4px;
+            word-break: break-all;
+            max-height: 30px;
+            overflow: hidden;
+        }
+        .shared-item .file-card .file-size {
+            font-size: 10px;
             color: #a0aec0;
         }
-        .shared-item .file-item .download-btn {
+        .shared-item .file-card .download-btn {
             background: #1a3c2a;
             color: white;
             border: none;
             padding: 4px 12px;
-            border-radius: 6px;
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
-            transition: all 0.2s;
+            margin-top: 4px;
+            width: 100%;
+            transition: background 0.2s;
         }
-        .shared-item .file-item .download-btn:hover {
+        .shared-item .file-card .download-btn:hover {
             background: #2d5a42;
-        }
-        .shared-item .file-item .download-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
         }
         .shared-item .message {
             color: #4a5568;
@@ -331,50 +335,6 @@
             padding: 8px 12px;
             background: #f0f5f2;
             border-radius: 6px;
-        }
-        .shared-item .image-preview {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 8px;
-        }
-        .shared-item .image-preview .img-wrapper {
-            position: relative;
-            display: inline-block;
-        }
-        .shared-item .image-preview img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 6px;
-            border: 1px solid #e8edea;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .shared-item .image-preview img:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .shared-item .image-preview .download-img-btn {
-            position: absolute;
-            bottom: 4px;
-            right: 4px;
-            background: #1a3c2a;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 22px;
-            height: 22px;
-            font-size: 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        .shared-item .image-preview .img-wrapper:hover .download-img-btn {
-            opacity: 1;
         }
         .no-files {
             text-align: center;
@@ -462,7 +422,8 @@
             .logo-area { justify-content: center; }
             .upload-card, .shared-files-section { padding: 20px; }
             .tabs { flex-direction: column; }
-            .shared-item .file-item { flex-wrap: wrap; }
+            .shared-item .file-card { width: 100px; }
+            .shared-item .file-card img { width: 80px; height: 80px; }
         }
     </style>
 </head>
@@ -847,9 +808,9 @@
         }
 
         // ============================================================
-        //  📥 DOWNLOAD FILE - WORKS FOR BOTH CLOUD AND LOCAL FILES!
+        //  📥 DOWNLOAD FILE - COMPLETE FIX!
         // ============================================================
-        async function downloadFile(url, filename) {
+        function downloadFile(url, filename) {
             const progressDiv = document.getElementById('downloadProgress');
             const progressBar = document.getElementById('progressBar');
             const progressText = document.getElementById('progressText');
@@ -859,59 +820,54 @@
             progressText.textContent = '0%';
 
             try {
-                // Check if it's a data URL (local file) or a cloud URL
-                let blob;
-                let fileName = filename;
-                
+                // For data URLs (local images), create download directly
                 if (url.startsWith('data:')) {
-                    // Local file - extract from data URL
-                    progressBar.style.width = '30%';
-                    progressText.textContent = '30%';
+                    progressBar.style.width = '50%';
+                    progressText.textContent = '50%';
                     
-                    const response = await fetch(url);
-                    blob = await response.blob();
+                    // Create download link directly from data URL
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
                     
-                    // Extract file extension from data URL
-                    const mimeType = blob.type;
-                    const ext = mimeType.split('/')[1] || 'file';
-                    if (!fileName.includes('.')) {
-                        fileName = fileName + '.' + ext;
-                    }
-                } else if (url.startsWith('http')) {
-                    // Cloud file - fetch normally
-                    progressBar.style.width = '30%';
-                    progressText.textContent = '30%';
+                    progressBar.style.width = '100%';
+                    progressText.textContent = '100%';
                     
-                    const response = await fetch(url);
-                    if (!response.ok) throw new Error('Failed to fetch file');
-                    blob = await response.blob();
-                } else {
-                    throw new Error('Invalid file URL');
+                    setTimeout(() => {
+                        progressDiv.style.display = 'none';
+                    }, 1500);
+                    
+                    showToast('✅ File downloaded successfully!');
+                    return;
                 }
                 
-                progressBar.style.width = '70%';
-                progressText.textContent = '70%';
+                // For cloud URLs (http/https)
+                if (url.startsWith('http')) {
+                    progressBar.style.width = '20%';
+                    progressText.textContent = '20%';
+                    
+                    // Open in new tab for cloud files
+                    window.open(url, '_blank');
+                    
+                    progressBar.style.width = '100%';
+                    progressText.textContent = '100%';
+                    
+                    setTimeout(() => {
+                        progressDiv.style.display = 'none';
+                    }, 1500);
+                    
+                    showToast('✅ File opened in new tab!');
+                    return;
+                }
                 
-                // Create download
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = fileName;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                throw new Error('Invalid file URL');
                 
-                progressBar.style.width = '100%';
-                progressText.textContent = '100%';
-                
-                setTimeout(() => {
-                    URL.revokeObjectURL(link.href);
-                    progressDiv.style.display = 'none';
-                }, 2000);
-                
-                showToast('✅ File downloaded successfully!');
             } catch (error) {
                 console.error('Download error:', error);
-                showToast('❌ Error downloading: ' + error.message, 'error');
+                showToast('❌ Error: ' + error.message, 'error');
                 progressDiv.style.display = 'none';
             }
         }
@@ -947,32 +903,59 @@
                 }
 
                 container.innerHTML = sharedFiles.map((item, index) => {
-                    // Build file list with download buttons
                     const filesHtml = item.files.map((f, i) => {
                         const src = f.url || f.data || '';
                         const cleanSrc = src.replace(/;\s*$/, '').trim();
                         const isImage = f.type && f.type.startsWith('image/');
                         const sizeKB = (f.size / 1024).toFixed(1);
+                        const displayName = f.name || 'file';
                         
-                        // For images, show thumbnail + download button
-                        if (isImage && cleanSrc) {
+                        // Check if it's a data URL or http URL
+                        const isDataUrl = cleanSrc.startsWith('data:');
+                        const isCloudUrl = cleanSrc.startsWith('http');
+                        
+                        if (isImage && (isDataUrl || isCloudUrl)) {
+                            // For images: show thumbnail + download button
                             return `
-                                <div class="file-item" style="flex-direction:column; align-items:center; width:120px; padding:10px;">
-                                    <img src="${cleanSrc}" alt="${f.name}" style="width:100px; height:80px; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="openLightbox('${cleanSrc}')" />
-                                    <div style="display:flex; flex-direction:column; width:100%; margin-top:6px;">
-                                        <span class="file-name" style="font-size:11px; text-align:center; word-break:break-all;">${f.name}</span>
-                                        <button class="download-btn" onclick="downloadFile('${cleanSrc}', '${f.name}')" style="width:100%; margin-top:4px;">⬇️ Download</button>
-                                    </div>
+                                <div class="file-card">
+                                    <img src="${cleanSrc}" alt="${displayName}" 
+                                         onclick="openLightbox('${cleanSrc}')"
+                                         onerror="this.style.display='none'; this.parentElement.querySelector('.file-icon').style.display='block';" />
+                                    <div class="file-icon" style="display:none;">🖼️</div>
+                                    <div class="file-name">${displayName}</div>
+                                    <div class="file-size">${sizeKB} KB</div>
+                                    <button class="download-btn" onclick="downloadFile('${cleanSrc}', '${displayName}')">⬇️ Download</button>
+                                </div>
+                            `;
+                        } else if (isCloudUrl) {
+                            // For cloud files: download link
+                            const icon = displayName.endsWith('.pdf') ? '📄' : '📎';
+                            return `
+                                <div class="file-card">
+                                    <div class="file-icon">${icon}</div>
+                                    <div class="file-name">${displayName}</div>
+                                    <div class="file-size">${sizeKB} KB</div>
+                                    <button class="download-btn" onclick="window.open('${cleanSrc}', '_blank')">📂 Open</button>
+                                </div>
+                            `;
+                        } else if (isDataUrl) {
+                            // For data URLs: direct download
+                            const icon = displayName.endsWith('.pdf') ? '📄' : '📎';
+                            return `
+                                <div class="file-card">
+                                    <div class="file-icon">${icon}</div>
+                                    <div class="file-name">${displayName}</div>
+                                    <div class="file-size">${sizeKB} KB</div>
+                                    <button class="download-btn" onclick="downloadFile('${cleanSrc}', '${displayName}')">⬇️ Download</button>
                                 </div>
                             `;
                         } else {
-                            // For non-images: show file name + download button
-                            const icon = f.name && f.name.endsWith('.pdf') ? '📄' : '📎';
                             return `
-                                <div class="file-item">
-                                    <span class="file-name">${icon} ${f.name}</span>
-                                    <span class="file-size">(${sizeKB} KB)</span>
-                                    <button class="download-btn" onclick="downloadFile('${cleanSrc}', '${f.name}')">⬇️ Download</button>
+                                <div class="file-card">
+                                    <div class="file-icon">📁</div>
+                                    <div class="file-name">${displayName}</div>
+                                    <div class="file-size">${sizeKB} KB</div>
+                                    <button class="download-btn" onclick="showToast('File not available', 'warning')">⚠️ Unavailable</button>
                                 </div>
                             `;
                         }
@@ -1014,6 +997,13 @@
                 viewSharedFiles();
             }
         });
+
+        // ============================================================
+        //  CLOSE LIGHTBOX
+        // ============================================================
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
 
         window.onload = function() {
             console.log('🌿 Jumbotail Customer Portal loaded!');
