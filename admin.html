@@ -15,7 +15,6 @@
         }
         .container { max-width: 1200px; margin: 0 auto; }
         
-        /* ===== TOP BAR ===== */
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -50,7 +49,6 @@
         }
         .logo-text span { color: #d4a843; }
         
-        /* ===== DASHBOARD HEADER ===== */
         .dashboard-header {
             background: white;
             padding: 24px 30px;
@@ -85,7 +83,6 @@
         }
         .btn-logout:hover { background: #2d5a42; }
         
-        /* ===== CARDS ===== */
         .card {
             background: white;
             border-radius: 12px;
@@ -107,7 +104,6 @@
             color: #1a3c2a;
         }
         
-        /* ===== BUTTONS ===== */
         .btn {
             padding: 8px 16px;
             border: none;
@@ -140,7 +136,6 @@
         
         .admin-actions { display: flex; gap: 8px; flex-wrap: wrap; }
         
-        /* ===== STATS ===== */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -165,7 +160,6 @@
             margin-top: 2px;
         }
         
-        /* ===== FILTER ===== */
         .filter-box {
             display: flex;
             gap: 12px;
@@ -195,7 +189,6 @@
             cursor: pointer;
         }
         
-        /* ===== UPLOAD ITEMS ===== */
         .upload-item {
             border: 1px solid #e8edea;
             border-radius: 10px;
@@ -327,7 +320,6 @@
             color: #718096;
         }
         
-        /* ===== SHARE MODAL ===== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -357,8 +349,7 @@
             color: #1a3c2a;
         }
         .modal .form-group input,
-        .modal .form-group textarea,
-        .modal .form-group select {
+        .modal .form-group textarea {
             width: 100%;
             padding: 10px 14px;
             border: 1.5px solid #d1d5d0;
@@ -415,7 +406,6 @@
             font-weight: 700;
         }
         
-        /* ===== TOAST ===== */
         .toast {
             position: fixed;
             bottom: 30px;
@@ -437,7 +427,6 @@
             to { opacity: 1; transform: translate(-50%, 0); }
         }
         
-        /* ===== LIGHTBOX ===== */
         .lightbox {
             display: none;
             position: fixed;
@@ -464,7 +453,6 @@
             cursor: pointer;
         }
         
-        /* ===== LOGIN ===== */
         .login-card {
             max-width: 400px;
             margin: 80px auto;
@@ -508,6 +496,21 @@
         }
         .login-card .btn { width: 100%; padding: 12px; }
         
+        .download-progress {
+            margin: 12px 0;
+            padding: 12px 16px;
+            background: #e8edea;
+            border-radius: 8px;
+            display: none;
+        }
+        .download-progress .bar {
+            height: 4px;
+            background: #1a3c2a;
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
         @media (max-width: 640px) {
             .dashboard-header { flex-direction: column; align-items: stretch; text-align: center; }
             .card-header { flex-direction: column; align-items: stretch; }
@@ -528,7 +531,6 @@
             <img id="lightboxImg" src="" alt="Preview" />
         </div>
 
-        <!-- ===== SHARE MODAL ===== -->
         <div class="modal-overlay" id="shareModal">
             <div class="modal">
                 <h3>📤 Share Files with Customer</h3>
@@ -558,7 +560,6 @@
             </div>
         </div>
 
-        <!-- ===== LOGIN ===== -->
         <div id="loginScreen">
             <div class="login-card">
                 <div class="logo-icon">J</div>
@@ -568,7 +569,6 @@
             </div>
         </div>
 
-        <!-- ===== DASHBOARD ===== -->
         <div id="dashboardScreen" style="display:none;">
             <div class="top-bar">
                 <div class="logo-area">
@@ -592,8 +592,16 @@
                         <button class="btn btn-share" onclick="openShareModal()">📤 Share Files</button>
                         <button class="btn btn-primary" onclick="loadUploads()">🔄 Refresh</button>
                         <button class="btn btn-excel" onclick="downloadExcel()">📊 Excel</button>
-                        <button class="btn btn-download" onclick="downloadAllImages()">📸 Images</button>
+                        <button class="btn btn-download" onclick="downloadAllImages()">📸 Download Images</button>
                     </div>
+                </div>
+
+                <div class="download-progress" id="downloadProgress">
+                    <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;">
+                        <span>Downloading images...</span>
+                        <span id="progressText">0%</span>
+                    </div>
+                    <div class="bar" id="progressBar"></div>
                 </div>
 
                 <div class="stats-grid" id="statsContainer"></div>
@@ -699,7 +707,7 @@
         }
 
         // ============================================================
-        //  HANDLE SHARE SUBMIT (Admin Sharing with Customer)
+        //  HANDLE SHARE SUBMIT
         // ============================================================
         async function handleShareSubmit(e) {
             e.preventDefault();
@@ -905,54 +913,110 @@
         }
 
         // ============================================================
-        //  DOWNLOAD FUNCTIONS
+        //  📸 DOWNLOAD ALL IMAGES - FIXED VERSION!
         // ============================================================
         async function downloadAllImages() {
+            // Get all image URLs
             const imageUrls = [];
             allUploads.forEach(upload => {
                 upload.files.forEach(file => {
                     if (file.url && file.type && file.type.startsWith('image/')) {
                         let cleanUrl = file.url.replace(/;\s*$/, '').trim();
-                        imageUrls.push({ url: cleanUrl, name: file.name || 'image.jpg' });
+                        // Only add if it's a valid URL (not local data)
+                        if (cleanUrl.startsWith('http')) {
+                            imageUrls.push({ url: cleanUrl, name: file.name || 'image.jpg' });
+                        }
                     }
                 });
             });
 
             if (imageUrls.length === 0) {
-                showToast('No images found to download', 'warning');
+                showToast('No cloud images found to download', 'warning');
                 return;
             }
 
+            // Show progress
+            const progressDiv = document.getElementById('downloadProgress');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            progressDiv.style.display = 'block';
+            progressBar.style.width = '0%';
+            progressText.textContent = '0%';
+
             try {
-                const zip = new JSZip();
+                const images = [];
                 let downloaded = 0;
-                for (let item of imageUrls) {
+                const total = imageUrls.length;
+
+                for (let i = 0; i < imageUrls.length; i++) {
+                    const item = imageUrls[i];
                     try {
+                        // Fetch the image as blob
                         const response = await fetch(item.url);
+                        if (!response.ok) throw new Error('Failed to fetch');
                         const blob = await response.blob();
-                        zip.file(item.name, blob);
+                        
+                        // Create a file name with proper extension
+                        let fileName = item.name;
+                        // If no extension, add one based on content type
+                        if (!fileName.includes('.')) {
+                            const ext = blob.type.split('/')[1] || 'jpg';
+                            fileName = fileName + '.' + ext;
+                        }
+                        
+                        images.push({
+                            name: fileName,
+                            blob: blob
+                        });
                     } catch (err) {
                         console.error('Failed to download:', item.url, err);
                     }
+                    
                     downloaded++;
+                    const percent = Math.round((downloaded / total) * 100);
+                    progressBar.style.width = percent + '%';
+                    progressText.textContent = percent + '%';
                 }
 
+                if (images.length === 0) {
+                    showToast('No images could be downloaded', 'error');
+                    progressDiv.style.display = 'none';
+                    return;
+                }
+
+                // Create ZIP using JSZip
+                const zip = new JSZip();
+                images.forEach(img => {
+                    zip.file(img.name, img.blob);
+                });
+
                 const zipBlob = await zip.generateAsync({ type: 'blob' });
+                
+                // Download ZIP
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(zipBlob);
                 link.download = `images_${new Date().toISOString().slice(0,10)}.zip`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                URL.revokeObjectURL(link.href);
+                
+                // Clean up
+                setTimeout(() => URL.revokeObjectURL(link.href), 5000);
 
-                showToast(`📸 Downloaded images as ZIP!`);
+                showToast(`📸 Downloaded ${images.length} images as ZIP!`);
             } catch (error) {
                 console.error('Download error:', error);
                 showToast('Error downloading images: ' + error.message, 'error');
+            } finally {
+                progressDiv.style.display = 'none';
+                progressBar.style.width = '0%';
+                progressText.textContent = '0%';
             }
         }
 
+        // ============================================================
+        //  📊 DOWNLOAD EXCEL
+        // ============================================================
         function downloadExcel() {
             if (allUploads.length === 0) {
                 showToast('No uploads to download', 'error');
