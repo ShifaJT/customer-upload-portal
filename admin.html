@@ -4,86 +4,141 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f0f2f5;
-            padding: 16px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f4f7f9;
+            padding: 20px;
+            color: #1a202c;
         }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
+        .container { max-width: 1200px; margin: 0 auto; }
+        .dashboard-header {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            border-left: 6px solid #2b6cb0;
         }
-        .header {
-            background: linear-gradient(135deg, #fc8181, #9b2c2c);
-            color: white;
-            padding: 30px 20px;
-            border-radius: 12px;
-            text-align: center;
-            margin-bottom: 20px;
+        .dashboard-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a365d;
         }
-        .header h1 { font-size: 28px; margin-bottom: 8px; }
-        .header p { opacity: 0.9; font-size: 14px; }
+        .dashboard-header .subtitle {
+            font-size: 14px;
+            color: #4a5568;
+            font-weight: 400;
+        }
         .card {
             background: white;
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 24px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            margin-bottom: 24px;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
             margin-bottom: 20px;
         }
+        .card-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+        }
         .btn {
-            padding: 12px 24px;
+            padding: 8px 16px;
             border: none;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
-        .btn-danger { background: #fc8181; color: white; }
-        .btn-danger:hover { background: #f56565; }
+        .btn-primary { background: #2b6cb0; color: white; }
+        .btn-primary:hover { background: #1a365d; }
         .btn-success { background: #48bb78; color: white; }
         .btn-success:hover { background: #38a169; }
-        .btn-primary { background: #667eea; color: white; }
-        .btn-primary:hover { background: #5a67d8; }
+        .btn-danger { background: #fc8181; color: white; }
+        .btn-danger:hover { background: #f56565; }
         .btn-excel { background: #1d6f42; color: white; }
         .btn-excel:hover { background: #155d36; }
         .btn-download { background: #9f7aea; color: white; }
         .btn-download:hover { background: #805ad5; }
-        .admin-login {
-            max-width: 400px;
-            margin: 40px auto;
+        .btn-backup { background: #ed8936; color: white; }
+        .btn-backup:hover { background: #dd6b20; }
+        .btn-outline { background: transparent; border: 1.5px solid #e2e8f0; color: #4a5568; }
+        .btn-outline:hover { background: #f7fafc; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
         }
-        .admin-login input {
+        .stat-card {
+            background: #f7fafc;
+            padding: 18px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #edf2f7;
+        }
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a365d;
+        }
+        .stat-card .label {
+            font-size: 13px;
+            color: #718096;
+            margin-top: 2px;
+        }
+        .filter-box input {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 16px;
-            margin-bottom: 15px;
+            max-width: 300px;
+            padding: 10px 16px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
         }
-        .admin-login input:focus {
+        .filter-box input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #2b6cb0;
+            box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.1);
         }
         .upload-item {
-            border-left: 4px solid #667eea;
+            border: 1px solid #edf2f7;
+            border-radius: 12px;
             padding: 16px;
             margin-bottom: 14px;
-            background: #f7fafc;
-            border-radius: 8px;
+            background: #fafbfc;
+            transition: all 0.15s;
         }
+        .upload-item:hover { background: #f7fafc; }
         .upload-item .meta {
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 8px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
         .upload-item .mobile {
             font-weight: 600;
             font-size: 16px;
+            color: #1a202c;
         }
         .upload-item .time {
             color: #718096;
@@ -92,32 +147,31 @@
         .upload-item .files {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin: 10px 0;
+            gap: 12px;
+            margin: 10px 0 12px 0;
         }
         .upload-item .file-preview {
             background: white;
             padding: 8px;
-            border-radius: 8px;
+            border-radius: 10px;
             border: 1px solid #e2e8f0;
             text-align: center;
-            width: 130px;
-            cursor: pointer;
-            transition: all 0.3s;
+            width: 120px;
             position: relative;
+            transition: all 0.15s;
         }
         .upload-item .file-preview:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         }
         .upload-item .file-preview img {
-            width: 110px;
-            height: 110px;
+            width: 100px;
+            height: 100px;
             object-fit: cover;
-            border-radius: 4px;
+            border-radius: 6px;
         }
         .upload-item .file-preview .file-icon {
-            font-size: 50px;
+            font-size: 40px;
             padding: 20px 0;
         }
         .upload-item .file-preview .file-name {
@@ -125,7 +179,7 @@
             color: #4a5568;
             margin-top: 4px;
             word-break: break-all;
-            max-height: 30px;
+            max-height: 28px;
             overflow: hidden;
         }
         .upload-item .file-preview .file-size {
@@ -142,115 +196,77 @@
             padding: 2px 6px;
             border-radius: 10px;
         }
+        .upload-item .file-preview .broken-badge {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            background: #fc8181;
+            color: white;
+            font-size: 8px;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
         .upload-item .file-preview .download-icon {
             position: absolute;
             bottom: 4px;
             right: 4px;
-            background: #667eea;
+            background: #2b6cb0;
             color: white;
             font-size: 10px;
             padding: 2px 6px;
             border-radius: 10px;
             opacity: 0;
-            transition: opacity 0.3s;
+            transition: opacity 0.2s;
+            cursor: pointer;
         }
-        .upload-item .file-preview:hover .download-icon {
-            opacity: 1;
-        }
+        .upload-item .file-preview:hover .download-icon { opacity: 1; }
         .badge {
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
         }
-        .badge-pending {
-            background: #fefcbf;
-            color: #975a16;
+        .badge-pending { background: #fefcbf; color: #975a16; }
+        .badge-viewed { background: #c6f6d5; color: #22543d; }
+        .badge-broken { background: #fc8181; color: white; }
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
         }
-        .badge-viewed {
-            background: #c6f6d5;
-            color: #22543d;
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .stat-card {
-            background: #f7fafc;
-            padding: 14px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .stat-card .number {
-            font-size: 24px;
-            font-weight: bold;
-            color: #667eea;
-        }
-        .stat-card .label {
-            font-size: 12px;
-            color: #718096;
-        }
-        .filter-box {
-            margin: 15px 0;
-        }
-        .filter-box input {
-            width: 100%;
-            max-width: 300px;
-            padding: 10px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 14px;
-        }
+        .action-buttons .btn { padding: 5px 14px; font-size: 12px; }
         .empty-state {
             text-align: center;
             padding: 40px;
             color: #718096;
         }
-        .sync-status {
-            background: #ebf8ff;
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-size: 13px;
-            border: 1px solid #bee3f8;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .sync-status .status-text {
-            color: #2b6cb0;
-        }
         .toast {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 14px 24px;
-            background: #48bb78;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 14px 28px;
+            background: #1a202c;
             color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
             z-index: 9999;
-            animation: slideIn 0.3s;
+            font-weight: 500;
+            animation: slideUp 0.3s ease;
         }
-        .toast.error { background: #fc8181; }
-        .toast.warning { background: #ed8936; }
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        .toast.error { background: #e53e3e; }
+        .toast.warning { background: #dd6b20; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translate(-50%, 20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
         }
         .lightbox {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 9999;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 9998;
             justify-content: center;
             align-items: center;
             cursor: pointer;
@@ -260,66 +276,57 @@
             max-width: 90%;
             max-height: 90%;
             object-fit: contain;
+            border-radius: 8px;
         }
         .lightbox .close {
             position: absolute;
-            top: 20px;
-            right: 30px;
+            top: 20px; right: 30px;
             color: white;
             font-size: 40px;
-            font-weight: bold;
+            font-weight: 300;
             cursor: pointer;
-        }
-        .lightbox .close:hover { color: #fc8181; }
-        .admin-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-        }
-        .admin-actions .btn {
-            width: auto;
-            padding: 8px 16px;
-            font-size: 14px;
-        }
-        .refresh-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-        .refresh-btn:hover { background: #5a67d8; }
-        .download-options {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
         }
         .download-progress {
-            margin: 10px 0;
-            padding: 10px;
+            margin: 12px 0;
+            padding: 12px 16px;
             background: #edf2f7;
-            border-radius: 8px;
+            border-radius: 10px;
             display: none;
         }
         .download-progress .bar {
-            height: 6px;
-            background: #667eea;
-            border-radius: 3px;
+            height: 4px;
+            background: #2b6cb0;
+            border-radius: 4px;
             width: 0%;
             transition: width 0.3s;
         }
-        @media (max-width: 600px) {
-            .header h1 { font-size: 22px; }
-            .upload-item .file-preview {
-                width: 90px;
-            }
-            .upload-item .file-preview img {
-                width: 70px;
-                height: 70px;
-            }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+        }
+        .modal h3 { margin-bottom: 12px; color: #1a365d; }
+        .modal p { color: #4a5568; font-size: 14px; }
+        .modal .btn { width: 100%; margin-top: 16px; }
+        @media (max-width: 640px) {
+            .dashboard-header { flex-direction: column; align-items: stretch; text-align: center; }
+            .card-header { flex-direction: column; align-items: stretch; }
+            .admin-actions { flex-wrap: wrap; }
+            .upload-item .file-preview { width: 90px; }
+            .upload-item .file-preview img { width: 70px; height: 70px; }
         }
     </style>
 </head>
@@ -331,52 +338,55 @@
             <img id="lightboxImg" src="" alt="Preview" />
         </div>
 
-        <div id="loginScreen">
-            <div class="header">
-                <h1>🔐 Admin Dashboard</h1>
-                <p>Secure access to all customer uploads</p>
-            </div>
-            <div class="card admin-login">
-                <h3 style="text-align:center; margin-bottom:20px;">Enter Admin Password</h3>
-                <input type="password" id="adminPassword" placeholder="Enter admin password" />
-                <button class="btn btn-primary" onclick="adminLogin()" style="width:100%;">Login</button>
+        <div class="modal-overlay" id="backupModal">
+            <div class="modal">
+                <h3>📦 Backup Complete!</h3>
+                <p id="backupSummary">Downloading backup...</p>
+                <button class="btn btn-primary" onclick="closeBackupModal()">OK</button>
             </div>
         </div>
 
+        <!-- Login Screen -->
+        <div id="loginScreen">
+            <div class="card" style="max-width: 400px; margin: 80px auto; text-align: center;">
+                <h2 style="margin-bottom: 20px; color: #1a365d;">🔐 Admin Login</h2>
+                <input type="password" id="adminPassword" placeholder="Enter admin password" 
+                       style="width:100%; padding:12px 16px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:16px; margin-bottom:15px;" />
+                <button class="btn btn-primary" onclick="adminLogin()" style="width:100%; padding:12px;">Login</button>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
         <div id="dashboardScreen" style="display:none;">
-            <div class="header">
-                <h1>📋 Admin Dashboard</h1>
-                <p>Manage all customer uploads</p>
+            <div class="dashboard-header">
+                <div>
+                    <h1>📋 Admin Dashboard</h1>
+                    <div class="subtitle">Manage all customer uploads</div>
+                </div>
+                <button class="btn btn-danger" onclick="adminLogout()">🚪 Logout</button>
             </div>
 
             <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:20px;">
+                <div class="card-header">
                     <h3>All Uploads</h3>
-                    <div class="admin-actions">
-                        <button class="refresh-btn" onclick="loadUploads()">🔄 Refresh</button>
-                        <div class="download-options">
-                            <button class="btn btn-excel" onclick="downloadExcel()">📊 Excel</button>
-                            <button class="btn btn-download" onclick="downloadAllImages()">📸 Download Images</button>
-                            <button class="btn btn-primary" onclick="downloadHTML()">📄 HTML</button>
-                        </div>
-                        <button class="btn btn-danger" onclick="adminLogout()" style="width:auto; padding:8px 20px;">🚪 Logout</button>
+                    <div class="admin-actions" style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button class="btn btn-primary" onclick="loadUploads()">🔄 Refresh</button>
+                        <button class="btn btn-backup" onclick="backupAllData()">📦 Backup</button>
+                        <button class="btn btn-excel" onclick="downloadExcel()">📊 Excel</button>
+                        <button class="btn btn-download" onclick="downloadAllImages()">📸 Images</button>
+                        <button class="btn btn-outline" onclick="downloadHTML()">📄 HTML</button>
                     </div>
                 </div>
 
                 <div class="download-progress" id="downloadProgress">
                     <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;">
-                        <span>Downloading images...</span>
+                        <span>Processing...</span>
                         <span id="progressText">0%</span>
                     </div>
                     <div class="bar" id="progressBar"></div>
                 </div>
 
-                <div class="sync-status">
-                    <span class="status-text">☁️ Images stored permanently on Cloudinary (NEVER expire!)</span>
-                    <span id="uploadCount" style="font-weight:600; color:#667eea;"></span>
-                </div>
-
-                <div class="stats" id="statsContainer"></div>
+                <div class="stats-grid" id="statsContainer"></div>
 
                 <div class="filter-box">
                     <input type="text" id="filterMobile" placeholder="🔍 Filter by mobile number..." 
@@ -434,10 +444,7 @@
         function closeLightbox() {
             document.getElementById('lightbox').classList.remove('active');
         }
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeLightbox();
-        });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
 
         async function loadFromGitHub() {
             try {
@@ -448,14 +455,10 @@
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 });
-
                 if (response.ok) {
                     const data = await response.json();
                     const content = atob(data.content);
-                    return {
-                        data: JSON.parse(content),
-                        sha: data.sha
-                    };
+                    return { data: JSON.parse(content), sha: data.sha };
                 } else if (response.status === 404) {
                     return { data: [], sha: null };
                 } else {
@@ -483,20 +486,69 @@
         }
 
         // ============================================================
-        //  📸 DOWNLOAD ALL IMAGES AS ZIP
+        //  📦 BACKUP ALL DATA
+        // ============================================================
+        function backupAllData() {
+            if (allUploads.length === 0) {
+                showToast('No data to backup', 'warning');
+                return;
+            }
+            
+            try {
+                // Create a comprehensive backup object
+                const backup = {
+                    exportDate: new Date().toISOString(),
+                    totalUploads: allUploads.length,
+                    uploads: allUploads.map(u => ({
+                        ...u,
+                        // Clean up file data for backup
+                        files: u.files.map(f => ({
+                            name: f.name,
+                            type: f.type,
+                            size: f.size,
+                            url: f.url || null,
+                            cloud: f.cloud || false,
+                            // If it's a local file, include the data
+                            ...(f.data && !f.url ? { data: f.data.substring(0, 100) + '...' } : {})
+                        }))
+                    }))
+                };
+                
+                const json = JSON.stringify(backup, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `backup_${new Date().toISOString().slice(0,10)}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+                
+                document.getElementById('backupSummary').textContent = 
+                    `✅ Backup complete!\n📦 ${allUploads.length} uploads exported.\n📁 File: backup_${new Date().toISOString().slice(0,10)}.json`;
+                document.getElementById('backupModal').classList.add('active');
+                
+                showToast(`📦 Backup created with ${allUploads.length} uploads!`);
+            } catch (error) {
+                console.error('Backup error:', error);
+                showToast('Error creating backup: ' + error.message, 'error');
+            }
+        }
+
+        function closeBackupModal() {
+            document.getElementById('backupModal').classList.remove('active');
+        }
+
+        // ============================================================
+        //  📸 DOWNLOAD ALL IMAGES (ZIP)
         // ============================================================
         async function downloadAllImages() {
-            // Get all image URLs
             const imageUrls = [];
             allUploads.forEach(upload => {
                 upload.files.forEach(file => {
                     if (file.url && file.type && file.type.startsWith('image/')) {
-                        // Clean URL - remove any trailing semicolons
                         let cleanUrl = file.url.replace(/;\s*$/, '').trim();
-                        imageUrls.push({
-                            url: cleanUrl,
-                            name: file.name || 'image.jpg'
-                        });
+                        imageUrls.push({ url: cleanUrl, name: file.name || 'image.jpg' });
                     }
                 });
             });
@@ -506,7 +558,6 @@
                 return;
             }
 
-            // Show progress
             const progressDiv = document.getElementById('downloadProgress');
             const progressBar = document.getElementById('progressBar');
             const progressText = document.getElementById('progressText');
@@ -515,7 +566,6 @@
             progressText.textContent = '0%';
 
             try {
-                // Fetch all images
                 const images = [];
                 let downloaded = 0;
                 const total = imageUrls.length;
@@ -526,27 +576,20 @@
                         const response = await fetch(item.url);
                         const blob = await response.blob();
                         const reader = new FileReader();
-                        
                         const dataUrl = await new Promise((resolve) => {
                             reader.onload = (e) => resolve(e.target.result);
                             reader.readAsDataURL(blob);
                         });
-                        
-                        images.push({
-                            name: item.name,
-                            dataUrl: dataUrl
-                        });
+                        images.push({ name: item.name, dataUrl: dataUrl });
                     } catch (err) {
                         console.error('Failed to download:', item.url, err);
                     }
-                    
                     downloaded++;
                     const percent = Math.round((downloaded / total) * 100);
                     progressBar.style.width = percent + '%';
                     progressText.textContent = percent + '%';
                 }
 
-                // Create ZIP file
                 const zip = new JSZip();
                 images.forEach(img => {
                     const base64Data = img.dataUrl.split(',')[1];
@@ -554,8 +597,6 @@
                 });
 
                 const zipBlob = await zip.generateAsync({ type: 'blob' });
-                
-                // Download ZIP
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(zipBlob);
                 link.download = `images_${new Date().toISOString().slice(0,10)}.zip`;
@@ -589,59 +630,40 @@
                     <html xmlns:o="urn:schemas-microsoft-com:office:office" 
                           xmlns:x="urn:schemas-microsoft-com:office:excel" 
                           xmlns="http://www.w3.org/TR/REC-html40">
-                    <head>
-                        <meta charset="UTF-8">
-                        <style>
-                            table { border-collapse: collapse; width: 100%; }
-                            th { background-color: #667eea; color: white; padding: 10px; border: 1px solid #ddd; }
-                            td { padding: 8px; border: 1px solid #ddd; }
-                            .url-link { color: #1a73e8; text-decoration: underline; }
-                        </style>
+                    <head><meta charset="UTF-8">
+                    <style>
+                        table { border-collapse: collapse; width: 100%; }
+                        th { background-color: #2b6cb0; color: white; padding: 10px; border: 1px solid #ddd; }
+                        td { padding: 8px; border: 1px solid #ddd; }
+                        .url-link { color: #1a73e8; text-decoration: underline; }
+                    </style>
                     </head>
-                    <body>
-                    <table>
+                    <body><table>
                         <tr>
-                            <th>#</th>
-                            <th>Mobile Number</th>
-                            <th>Date & Time</th>
-                            <th>Latitude</th>
-                            <th>Longitude</th>
-                            <th>File Names</th>
-                            <th>Image URLs</th>
-                            <th>Status</th>
+                            <th>#</th><th>Mobile</th><th>Date & Time</th>
+                            <th>Latitude</th><th>Longitude</th>
+                            <th>File Names</th><th>Image URLs</th><th>Status</th>
                         </tr>
                 `;
 
                 allUploads.forEach((upload, index) => {
                     const mobile = upload.mobile || '';
                     const date = upload.timestamp ? new Date(upload.timestamp).toLocaleString() : '';
+                    let lat = '', lng = '';
+                    if (upload.location) { lat = upload.location.lat || ''; lng = upload.location.lng || ''; }
                     
-                    let lat = '';
-                    let lng = '';
-                    if (upload.location) {
-                        lat = upload.location.lat || '';
-                        lng = upload.location.lng || '';
-                    }
-                    
-                    let fileNames = [];
-                    let fileUrls = [];
-                    
+                    let fileNames = [], fileUrls = [];
                     upload.files.forEach((file) => {
                         fileNames.push(file.name || 'Unnamed');
-                        if (file.url) {
-                            let cleanUrl = file.url.replace(/;\s*$/, '').trim();
-                            fileUrls.push(cleanUrl);
-                        } else if (file.data) {
-                            fileUrls.push('Local file (view in admin)');
+                        let url = file.url || file.data || '';
+                        if (url) {
+                            url = url.replace(/;\s*$/, '').trim();
+                            fileUrls.push(url);
                         } else {
-                            fileUrls.push('No URL');
+                            fileUrls.push('Local file');
                         }
                     });
-                    
                     const status = upload.viewed ? 'Viewed' : 'Pending';
-                    
-                    const fileNameStr = fileNames.join('; ');
-                    const fileUrlStr = fileUrls.join('; ');
                     
                     html += `
                         <tr>
@@ -650,32 +672,22 @@
                             <td>${date}</td>
                             <td>${lat}</td>
                             <td>${lng}</td>
-                            <td>${fileNameStr}</td>
-                            <td><a href="${fileUrlStr}" target="_blank">${fileUrlStr}</a></td>
+                            <td>${fileNames.join('; ')}</td>
+                            <td><a href="${fileUrls.join('; ')}" target="_blank">${fileUrls.join('; ')}</a></td>
                             <td>${status}</td>
                         </tr>
                     `;
                 });
 
-                html += `
-                    </table>
-                    </body>
-                    </html>
-                `;
-
-                const blob = new Blob([html], { 
-                    type: 'application/vnd.ms-excel;charset=utf-8' 
-                });
-                
+                html += `</table></body></html>`;
+                const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
                 const link = document.createElement('a');
-                const url = URL.createObjectURL(blob);
-                link.href = url;
+                link.href = URL.createObjectURL(blob);
                 link.download = `uploads_${new Date().toISOString().slice(0,10)}.xls`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-                
+                URL.revokeObjectURL(link.href);
                 showToast(`✅ Downloaded ${allUploads.length} uploads as Excel!`);
             } catch (error) {
                 console.error('Download error:', error);
@@ -696,21 +708,20 @@
                 let html = `
                     <!DOCTYPE html>
                     <html>
-                    <head>
-                        <title>Upload Report</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
-                            .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
-                            h1 { color: #667eea; }
-                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                            th { background: #667eea; color: white; padding: 10px; text-align: left; }
-                            td { padding: 10px; border-bottom: 1px solid #ddd; }
-                            .url { color: #1a73e8; word-break: break-all; }
-                            .pending { background: #fefcbf; padding: 2px 8px; border-radius: 4px; }
-                            .viewed { background: #c6f6d5; padding: 2px 8px; border-radius: 4px; }
-                            img { max-width: 80px; max-height: 80px; object-fit: cover; border-radius: 4px; }
-                            tr:hover { background: #f7fafc; }
-                        </style>
+                    <head><title>Upload Report</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+                        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+                        h1 { color: #1a365d; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th { background: #2b6cb0; color: white; padding: 10px; text-align: left; }
+                        td { padding: 10px; border-bottom: 1px solid #ddd; }
+                        .url { color: #1a73e8; word-break: break-all; }
+                        .pending { background: #fefcbf; padding: 2px 8px; border-radius: 4px; }
+                        .viewed { background: #c6f6d5; padding: 2px 8px; border-radius: 4px; }
+                        img { max-width: 80px; max-height: 80px; object-fit: cover; border-radius: 4px; }
+                        tr:hover { background: #f7fafc; }
+                    </style>
                     </head>
                     <body>
                     <div class="container">
@@ -718,28 +729,19 @@
                         <p>Total Uploads: ${allUploads.length}</p>
                         <table>
                             <tr>
-                                <th>#</th>
-                                <th>Mobile</th>
-                                <th>Date</th>
-                                <th>Location</th>
-                                <th>Files</th>
-                                <th>Image URLs</th>
-                                <th>Status</th>
+                                <th>#</th><th>Mobile</th><th>Date</th>
+                                <th>Location</th><th>Files</th><th>Image URLs</th><th>Status</th>
                             </tr>
                 `;
 
                 allUploads.forEach((upload, index) => {
                     const mobile = upload.mobile || '';
                     const date = upload.timestamp ? new Date(upload.timestamp).toLocaleString() : '';
-                    
                     let locationText = 'Not shared';
                     if (upload.location) {
                         locationText = `${upload.location.lat || ''}, ${upload.location.lng || ''}`;
                     }
-                    
-                    let fileNames = [];
-                    let fileUrls = [];
-                    
+                    let fileNames = [], fileUrls = [];
                     upload.files.forEach((file) => {
                         fileNames.push(file.name || 'Unnamed');
                         let url = file.url || file.data || '';
@@ -750,7 +752,6 @@
                             fileUrls.push('Local file');
                         }
                     });
-                    
                     const status = upload.viewed ? 'Viewed' : 'Pending';
                     const statusClass = upload.viewed ? 'viewed' : 'pending';
                     
@@ -775,19 +776,14 @@
                     </html>
                 `;
 
-                const blob = new Blob([html], { 
-                    type: 'text/html;charset=utf-8' 
-                });
-                
+                const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
                 const link = document.createElement('a');
-                const url = URL.createObjectURL(blob);
-                link.href = url;
+                link.href = URL.createObjectURL(blob);
                 link.download = `upload_report_${new Date().toISOString().slice(0,10)}.html`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-                
+                URL.revokeObjectURL(link.href);
                 showToast(`📄 Downloaded HTML report with ${allUploads.length} uploads!`);
             } catch (error) {
                 console.error('Download error:', error);
@@ -802,18 +798,16 @@
             const filter = document.getElementById('filterMobile').value.trim().toLowerCase();
             let filtered = allUploads;
             if (filter) {
-                filtered = allUploads.filter(u => u.mobile.includes(filter));
+                filtered = allUploads.filter(u => u.mobile && u.mobile.includes(filter));
             }
 
             const total = allUploads.length;
             const pending = allUploads.filter(u => !u.viewed).length;
             const viewed = allUploads.filter(u => u.viewed).length;
             document.getElementById('statsContainer').innerHTML = `
-                <div class="stats">
-                    <div class="stat-card"><div class="number">${total}</div><div class="label">Total</div></div>
-                    <div class="stat-card"><div class="number">${pending}</div><div class="label">Pending</div></div>
-                    <div class="stat-card"><div class="number">${viewed}</div><div class="label">Viewed</div></div>
-                </div>
+                <div class="stat-card"><div class="number">${total}</div><div class="label">Total Uploads</div></div>
+                <div class="stat-card"><div class="number">${pending}</div><div class="label">Pending</div></div>
+                <div class="stat-card"><div class="number">${viewed}</div><div class="label">Viewed</div></div>
             `;
 
             const container = document.getElementById('uploadsList');
@@ -829,13 +823,16 @@
                     const cleanSrc = imageSrc.replace(/;\s*$/, '').trim();
                     
                     if (isImage && cleanSrc) {
+                        // Check if image is broken (for imgbb images)
+                        const isBroken = f.cloud === false || (!f.url && f.data);
                         return `
                             <div class="file-preview" onclick="openLightbox('${cleanSrc}')">
                                 <img src="${cleanSrc}" alt="${f.name}" 
-                                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23f0f2f5%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2230%22%3E🖼️%3C/text%3E%3C/svg%3E'" />
+                                     onerror="this.parentElement.innerHTML='<div class=\\'file-icon\\'>🖼️</div><div class=\\'file-name\\'>${f.name}</div><div class=\\'file-size\\'>Image not found</div><div class=\\'broken-badge\\'>❌</div>'" />
                                 <div class="file-name">${f.name}</div>
                                 <div class="file-size">${(f.size/1024).toFixed(1)} KB</div>
                                 ${f.cloud ? '<div class="cloud-badge">☁️</div>' : ''}
+                                ${isBroken ? '<div class="broken-badge">❌</div>' : ''}
                                 <a href="${cleanSrc}" download="${f.name}" class="download-icon">⬇️</a>
                             </div>
                         `;
@@ -860,15 +857,15 @@
                 return `
                     <div class="upload-item">
                         <div class="meta">
-                            <span class="mobile">📱 ${u.mobile}</span>
-                            <span class="time">${new Date(u.timestamp).toLocaleString()}</span>
+                            <span class="mobile">📱 ${u.mobile || 'Unknown'}</span>
+                            <span class="time">${u.timestamp ? new Date(u.timestamp).toLocaleString() : 'No date'}</span>
                             <span class="badge ${badgeClass}">${badgeText}</span>
                         </div>
                         <div style="font-size:13px; color:#4a5568;">${locationHtml}</div>
                         <div class="files">${filesHtml}</div>
-                        <div style="margin-top:8px;">
-                            ${!u.viewed ? `<button class="btn btn-success" style="width:auto; padding:6px 16px; font-size:13px;" onclick="markViewed('${u.id}')">✅ Mark as Viewed</button>` : ''}
-                            <button class="btn btn-danger" style="width:auto; padding:6px 16px; font-size:13px; margin-left:6px;" onclick="deleteUpload('${u.id}')">🗑️ Delete</button>
+                        <div class="action-buttons">
+                            ${!u.viewed ? `<button class="btn btn-success" onclick="markViewed('${u.id}')">✅ Mark as Viewed</button>` : ''}
+                            <button class="btn btn-danger" onclick="deleteUpload('${u.id}')">🗑️ Delete</button>
                         </div>
                     </div>
                 `;
@@ -894,6 +891,8 @@
         }
 
         function showToast(msg, type = 'success') {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.textContent = msg;
@@ -904,10 +903,9 @@
         window.onload = function() {
             console.log('🔐 Admin Dashboard loaded!');
             console.log('☁️ Cloudinary configured for PERMANENT storage!');
-            console.log('📸 Image download feature ready!');
         };
     </script>
-    <!-- JSZip library for ZIP creation -->
+    <!-- JSZip for image downloads -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </body>
 </html>
