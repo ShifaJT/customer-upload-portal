@@ -13,10 +13,7 @@
             padding: 20px;
             color: #1a202c;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
+        .container { max-width: 800px; margin: 0 auto; }
         
         .top-bar {
             display: flex;
@@ -215,6 +212,9 @@
         .btn-download {
             background: #3182ce;
             color: white;
+            padding: 6px 14px;
+            font-size: 13px;
+            width: auto;
         }
         .btn-download:hover { background: #2b6cb0; }
         .location-btn {
@@ -283,27 +283,46 @@
             gap: 10px;
             margin-top: 8px;
         }
-        .shared-item .file-link {
+        .shared-item .file-item {
             background: white;
-            padding: 6px 14px;
+            padding: 8px 14px;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
-            text-decoration: none;
-            color: #1a3c2a;
-            font-size: 13px;
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 10px;
             transition: all 0.2s;
-            cursor: pointer;
         }
-        .shared-item .file-link:hover {
-            background: #1a3c2a;
-            color: white;
+        .shared-item .file-item:hover {
+            background: #f0f5f2;
             border-color: #1a3c2a;
         }
-        .shared-item .file-link .download-icon {
+        .shared-item .file-item .file-name {
+            font-size: 13px;
+            color: #1a3c2a;
+            word-break: break-all;
+        }
+        .shared-item .file-item .file-size {
+            font-size: 11px;
+            color: #a0aec0;
+        }
+        .shared-item .file-item .download-btn {
+            background: #1a3c2a;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 6px;
+            cursor: pointer;
             font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .shared-item .file-item .download-btn:hover {
+            background: #2d5a42;
+        }
+        .shared-item .file-item .download-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         .shared-item .message {
             color: #4a5568;
@@ -319,6 +338,10 @@
             gap: 8px;
             margin-top: 8px;
         }
+        .shared-item .image-preview .img-wrapper {
+            position: relative;
+            display: inline-block;
+        }
         .shared-item .image-preview img {
             width: 80px;
             height: 80px;
@@ -331,6 +354,27 @@
         .shared-item .image-preview img:hover {
             transform: scale(1.05);
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .shared-item .image-preview .download-img-btn {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: #1a3c2a;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .shared-item .image-preview .img-wrapper:hover .download-img-btn {
+            opacity: 1;
         }
         .no-files {
             text-align: center;
@@ -418,6 +462,7 @@
             .logo-area { justify-content: center; }
             .upload-card, .shared-files-section { padding: 20px; }
             .tabs { flex-direction: column; }
+            .shared-item .file-item { flex-wrap: wrap; }
         }
     </style>
 </head>
@@ -491,7 +536,7 @@
 
             <div class="download-progress" id="downloadProgress">
                 <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;">
-                    <span>Downloading files...</span>
+                    <span>Downloading...</span>
                     <span id="progressText">0%</span>
                 </div>
                 <div class="bar" id="progressBar"></div>
@@ -802,34 +847,55 @@
         }
 
         // ============================================================
-        //  📥 DOWNLOAD SINGLE FILE - FIXED!
+        //  📥 DOWNLOAD FILE - WORKS FOR BOTH CLOUD AND LOCAL FILES!
         // ============================================================
         async function downloadFile(url, filename) {
+            const progressDiv = document.getElementById('downloadProgress');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            progressDiv.style.display = 'block';
+            progressBar.style.width = '0%';
+            progressText.textContent = '0%';
+
             try {
-                const progressDiv = document.getElementById('downloadProgress');
-                const progressBar = document.getElementById('progressBar');
-                const progressText = document.getElementById('progressText');
+                // Check if it's a data URL (local file) or a cloud URL
+                let blob;
+                let fileName = filename;
                 
-                progressDiv.style.display = 'block';
-                progressBar.style.width = '10%';
-                progressText.textContent = '10%';
+                if (url.startsWith('data:')) {
+                    // Local file - extract from data URL
+                    progressBar.style.width = '30%';
+                    progressText.textContent = '30%';
+                    
+                    const response = await fetch(url);
+                    blob = await response.blob();
+                    
+                    // Extract file extension from data URL
+                    const mimeType = blob.type;
+                    const ext = mimeType.split('/')[1] || 'file';
+                    if (!fileName.includes('.')) {
+                        fileName = fileName + '.' + ext;
+                    }
+                } else if (url.startsWith('http')) {
+                    // Cloud file - fetch normally
+                    progressBar.style.width = '30%';
+                    progressText.textContent = '30%';
+                    
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error('Failed to fetch file');
+                    blob = await response.blob();
+                } else {
+                    throw new Error('Invalid file URL');
+                }
                 
-                // Fetch the file
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Failed to fetch file');
+                progressBar.style.width = '70%';
+                progressText.textContent = '70%';
                 
-                progressBar.style.width = '50%';
-                progressText.textContent = '50%';
-                
-                const blob = await response.blob();
-                
-                progressBar.style.width = '80%';
-                progressText.textContent = '80%';
-                
-                // Create download link
+                // Create download
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = filename;
+                link.download = fileName;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -840,18 +906,18 @@
                 setTimeout(() => {
                     URL.revokeObjectURL(link.href);
                     progressDiv.style.display = 'none';
-                }, 3000);
+                }, 2000);
                 
                 showToast('✅ File downloaded successfully!');
             } catch (error) {
                 console.error('Download error:', error);
-                showToast('❌ Error downloading file: ' + error.message, 'error');
-                document.getElementById('downloadProgress').style.display = 'none';
+                showToast('❌ Error downloading: ' + error.message, 'error');
+                progressDiv.style.display = 'none';
             }
         }
 
         // ============================================================
-        //  VIEW SHARED FILES (Customer Side) - WITH FIXED DOWNLOAD
+        //  VIEW SHARED FILES - COMPLETELY FIXED
         // ============================================================
         async function viewSharedFiles() {
             const mobile = document.getElementById('viewMobile').value.trim();
@@ -881,28 +947,35 @@
                 }
 
                 container.innerHTML = sharedFiles.map((item, index) => {
-                    // Separate images and other files
-                    const images = item.files.filter(f => f.type && f.type.startsWith('image/'));
-                    const otherFiles = item.files.filter(f => !f.type || !f.type.startsWith('image/'));
-
-                    const imagesHtml = images.length > 0 ? `
-                        <div class="image-preview">
-                            ${images.map(f => {
-                                const src = f.url || f.data || '';
-                                const cleanSrc = src.replace(/;\s*$/, '').trim();
-                                return `<img src="${cleanSrc}" alt="${f.name}" onclick="openLightbox('${cleanSrc}')" />`;
-                            }).join('')}
-                        </div>
-                    ` : '';
-
-                    const filesHtml = otherFiles.map(f => {
+                    // Build file list with download buttons
+                    const filesHtml = item.files.map((f, i) => {
                         const src = f.url || f.data || '';
                         const cleanSrc = src.replace(/;\s*$/, '').trim();
-                        return `
-                            <div class="file-link" onclick="downloadFile('${cleanSrc}', '${f.name}')">
-                                📎 ${f.name} <span class="download-icon">⬇️</span>
-                            </div>
-                        `;
+                        const isImage = f.type && f.type.startsWith('image/');
+                        const sizeKB = (f.size / 1024).toFixed(1);
+                        
+                        // For images, show thumbnail + download button
+                        if (isImage && cleanSrc) {
+                            return `
+                                <div class="file-item" style="flex-direction:column; align-items:center; width:120px; padding:10px;">
+                                    <img src="${cleanSrc}" alt="${f.name}" style="width:100px; height:80px; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="openLightbox('${cleanSrc}')" />
+                                    <div style="display:flex; flex-direction:column; width:100%; margin-top:6px;">
+                                        <span class="file-name" style="font-size:11px; text-align:center; word-break:break-all;">${f.name}</span>
+                                        <button class="download-btn" onclick="downloadFile('${cleanSrc}', '${f.name}')" style="width:100%; margin-top:4px;">⬇️ Download</button>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            // For non-images: show file name + download button
+                            const icon = f.name && f.name.endsWith('.pdf') ? '📄' : '📎';
+                            return `
+                                <div class="file-item">
+                                    <span class="file-name">${icon} ${f.name}</span>
+                                    <span class="file-size">(${sizeKB} KB)</span>
+                                    <button class="download-btn" onclick="downloadFile('${cleanSrc}', '${f.name}')">⬇️ Download</button>
+                                </div>
+                            `;
+                        }
                     }).join('');
 
                     const messageHtml = item.message ? `
@@ -916,8 +989,7 @@
                                 <span class="date">${new Date(item.timestamp).toLocaleString()}</span>
                             </div>
                             ${messageHtml}
-                            ${imagesHtml}
-                            ${filesHtml ? `<div class="files">${filesHtml}</div>` : ''}
+                            <div class="files">${filesHtml}</div>
                         </div>
                     `;
                 }).join('');
