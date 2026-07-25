@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Jumbotail - Customer Upload Portal</title>
+    <title>Jumbotail - Customer Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -14,7 +14,7 @@
             color: #1a202c;
         }
         .container {
-            max-width: 700px;
+            max-width: 800px;
             margin: 0 auto;
         }
         
@@ -59,7 +59,7 @@
         .hero {
             background: linear-gradient(135deg, #1a3c2a 0%, #2d5a42 100%);
             color: white;
-            padding: 40px 45px;
+            padding: 30px 40px;
             border-radius: 16px;
             margin-bottom: 28px;
             position: relative;
@@ -74,19 +74,49 @@
             opacity: 0.1;
         }
         .hero h1 {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 700;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
         .hero .subtitle {
-            font-size: 15px;
+            font-size: 14px;
             opacity: 0.85;
-            margin-bottom: 4px;
         }
         .hero .tagline {
             font-size: 13px;
             opacity: 0.6;
             font-style: italic;
+            margin-top: 4px;
+        }
+        
+        /* ===== TABS ===== */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: #e8edea;
+            padding: 4px;
+            border-radius: 10px;
+            margin-bottom: 24px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+            color: #4a5568;
+        }
+        .tab-btn.active {
+            background: white;
+            color: #1a3c2a;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .tab-btn:hover:not(.active) {
+            color: #1a3c2a;
         }
         
         /* ===== UPLOAD FORM ===== */
@@ -122,7 +152,8 @@
             color: #1a3c2a;
             font-size: 14px;
         }
-        .form-group input[type="tel"] {
+        .form-group input[type="tel"],
+        .form-group input[type="text"] {
             width: 100%;
             padding: 12px 16px;
             border: 1.5px solid #d1d5d0;
@@ -131,7 +162,7 @@
             background: #fafaf8;
             transition: border-color 0.2s;
         }
-        .form-group input[type="tel"]:focus {
+        .form-group input:focus {
             outline: none;
             border-color: #1a3c2a;
             box-shadow: 0 0 0 3px rgba(26, 60, 42, 0.1);
@@ -199,6 +230,13 @@
             transform: none;
             box-shadow: none;
         }
+        .btn-secondary {
+            background: #1a3c2a;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #2d5a42;
+        }
         .location-btn {
             background: #1a3c2a;
             color: white;
@@ -226,19 +264,78 @@
             border-radius: 4px;
         }
         
-        /* ===== FOOTER ===== */
-        .footer {
-            text-align: center;
-            color: #a0aec0;
-            font-size: 12px;
-            padding-top: 16px;
-            border-top: 1px solid #e8edea;
-            margin-top: 20px;
+        /* ===== VIEW SHARED FILES ===== */
+        .shared-files-section {
+            background: white;
+            border-radius: 12px;
+            padding: 28px;
+            border: 1px solid #e8edea;
+            margin-bottom: 20px;
         }
-        .footer .brand {
+        .shared-files-section h3 {
             color: #1a3c2a;
-            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
+        .shared-item {
+            border: 1px solid #e8edea;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: #fafaf8;
+        }
+        .shared-item .meta {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .shared-item .date {
+            color: #718096;
+            font-size: 13px;
+        }
+        .shared-item .files {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .shared-item .file-link {
+            background: white;
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            text-decoration: none;
+            color: #1a3c2a;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .shared-item .file-link:hover {
+            background: #1a3c2a;
+            color: white;
+            border-color: #1a3c2a;
+        }
+        .shared-item .message {
+            color: #4a5568;
+            font-size: 14px;
+            margin: 6px 0;
+            padding: 8px 12px;
+            background: #f0f5f2;
+            border-radius: 6px;
+        }
+        .no-files {
+            text-align: center;
+            padding: 30px;
+            color: #a0aec0;
+        }
+        .no-files .icon { font-size: 40px; display: block; margin-bottom: 10px; }
         
         /* ===== TOAST ===== */
         .toast {
@@ -262,12 +359,27 @@
             to { opacity: 1; transform: translate(-50%, 0); }
         }
         
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center;
+            color: #a0aec0;
+            font-size: 12px;
+            padding-top: 16px;
+            border-top: 1px solid #e8edea;
+            margin-top: 20px;
+        }
+        .footer .brand {
+            color: #1a3c2a;
+            font-weight: 600;
+        }
+        
         @media (max-width: 600px) {
             .hero { padding: 24px 20px; }
             .hero h1 { font-size: 22px; }
             .top-bar { flex-direction: column; align-items: stretch; text-align: center; }
             .logo-area { justify-content: center; }
-            .upload-card { padding: 20px; }
+            .upload-card, .shared-files-section { padding: 20px; }
+            .tabs { flex-direction: column; }
         }
     </style>
 </head>
@@ -284,13 +396,19 @@
 
         <!-- ===== HERO ===== -->
         <div class="hero">
-            <h1>📤 Customer Upload Portal</h1>
-            <div class="subtitle">Securely upload your images, videos, and documents</div>
+            <h1>📤 Customer Portal</h1>
+            <div class="subtitle">Upload files to Jumbotail • View files shared with you</div>
             <div class="tagline">Jai Jawan, Jai Kisan, Jai Dukaan</div>
         </div>
 
-        <!-- ===== UPLOAD FORM ===== -->
-        <div class="upload-card">
+        <!-- ===== TABS ===== -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('upload')">📤 Upload Files</button>
+            <button class="tab-btn" onclick="switchTab('view')">📂 View Shared Files</button>
+        </div>
+
+        <!-- ===== TAB 1: UPLOAD ===== -->
+        <div id="uploadTab" class="upload-card">
             <h3>
                 📎 Upload Files
                 <span class="badge">NEW</span>
@@ -298,7 +416,7 @@
 
             <form id="uploadForm" onsubmit="handleSubmit(event)">
                 <div class="form-group">
-                    <label for="mobile">📱 Mobile Number *</label>
+                    <label for="mobile">📱 Your Mobile Number *</label>
                     <input type="tel" id="mobile" placeholder="Enter 10-digit mobile number" 
                            pattern="[0-9]{10}" required />
                 </div>
@@ -334,6 +452,27 @@
             </form>
         </div>
 
+        <!-- ===== TAB 2: VIEW SHARED FILES ===== -->
+        <div id="viewTab" class="shared-files-section" style="display:none;">
+            <h3>📂 Files Shared With You</h3>
+            
+            <div class="form-group">
+                <label>📱 Enter Mobile Number to Check</label>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <input type="tel" id="viewMobile" placeholder="Enter 10-digit mobile number" 
+                           pattern="[0-9]{10}" style="flex:1; min-width:200px; padding:12px 16px; border:1.5px solid #d1d5d0; border-radius:8px; font-size:16px; background:#fafaf8;" />
+                    <button class="btn btn-secondary" onclick="viewSharedFiles()" style="width:auto; padding:12px 24px;">🔍 Check</button>
+                </div>
+            </div>
+
+            <div id="sharedFilesList">
+                <div class="no-files">
+                    <span class="icon">📭</span>
+                    <p>Enter your mobile number to view files shared with you</p>
+                </div>
+            </div>
+        </div>
+
         <div class="footer">
             © 2024 <span class="brand">Jumbotail</span> • All rights reserved
         </div>
@@ -356,6 +495,22 @@
         // ============================================================
         let selectedFiles = [];
         let userLocation = null;
+
+        // ============================================================
+        //  TAB SWITCHING
+        // ============================================================
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            if (tab === 'upload') {
+                document.getElementById('uploadTab').style.display = 'block';
+                document.getElementById('viewTab').style.display = 'none';
+                document.querySelector('.tab-btn:first-child').classList.add('active');
+            } else {
+                document.getElementById('uploadTab').style.display = 'none';
+                document.getElementById('viewTab').style.display = 'block';
+                document.querySelector('.tab-btn:last-child').classList.add('active');
+            }
+        }
 
         // ============================================================
         //  UI FUNCTIONS
@@ -546,7 +701,7 @@
         }
 
         // ============================================================
-        //  SUBMIT HANDLER
+        //  SUBMIT HANDLER (Customer Upload)
         // ============================================================
         async function handleSubmit(e) {
             e.preventDefault();
@@ -565,7 +720,7 @@
             const progressFill = document.getElementById('progressFill');
             
             btn.disabled = true;
-            btn.textContent = '⏳ Uploading to Cloud...';
+            btn.textContent = '⏳ Uploading...';
             progressBar.style.display = 'block';
             progressFill.style.width = '0%';
 
@@ -610,11 +765,13 @@
                 const { data: existingData, sha } = await loadFromGitHub();
                 const upload = {
                     id: Date.now().toString(),
+                    type: 'customer_upload',
                     mobile: mobile,
                     files: uploadedFiles,
                     location: userLocation,
                     timestamp: new Date().toISOString(),
-                    viewed: false
+                    viewed: false,
+                    direction: 'customer_to_admin'
                 };
                 existingData.unshift(upload);
                 await saveToGitHub(existingData, sha);
@@ -627,7 +784,7 @@
                 document.getElementById('locationDisplay').innerHTML = '';
                 document.getElementById('fileInput').value = '';
 
-                showToast('✅ Upload successful! Stored permanently.');
+                showToast('✅ Upload successful!');
             } catch (err) {
                 console.error('Upload error:', err);
                 showToast('❌ Upload failed: ' + err.message, 'error');
@@ -639,6 +796,75 @@
             }
         }
 
+        // ============================================================
+        //  VIEW SHARED FILES (Customer Side)
+        // ============================================================
+        async function viewSharedFiles() {
+            const mobile = document.getElementById('viewMobile').value.trim();
+            if (!mobile || mobile.length !== 10) {
+                showToast('Please enter a valid 10-digit mobile number', 'error');
+                return;
+            }
+
+            const container = document.getElementById('sharedFilesList');
+            container.innerHTML = '<div style="text-align:center; padding:20px;">⏳ Loading...</div>';
+
+            try {
+                const { data } = await loadFromGitHub();
+                
+                // Find files shared by admin for this mobile number
+                const sharedFiles = data.filter(item => 
+                    item.type === 'admin_share' && 
+                    item.mobile === mobile
+                );
+
+                if (sharedFiles.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-files">
+                            <span class="icon">📭</span>
+                            <p>No files have been shared with you yet.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = sharedFiles.map((item, index) => {
+                    const filesHtml = item.files.map(f => `
+                        <a href="${f.url}" download="${f.name}" class="file-link" target="_blank">
+                            📎 ${f.name}
+                        </a>
+                    `).join('');
+
+                    const messageHtml = item.message ? `
+                        <div class="message">💬 ${item.message}</div>
+                    ` : '';
+
+                    return `
+                        <div class="shared-item">
+                            <div class="meta">
+                                <span style="font-weight:600;">📁 Shared with you</span>
+                                <span class="date">${new Date(item.timestamp).toLocaleString()}</span>
+                            </div>
+                            ${messageHtml}
+                            <div class="files">${filesHtml}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                showToast(`📂 Found ${sharedFiles.length} shared file(s)`);
+
+            } catch (err) {
+                console.error('Error loading shared files:', err);
+                container.innerHTML = `
+                    <div class="no-files">
+                        <span class="icon">⚠️</span>
+                        <p>Error loading files. Please try again.</p>
+                    </div>
+                `;
+                showToast('Error loading files', 'error');
+            }
+        }
+
         function readFileAsDataURL(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -647,6 +873,13 @@
                 reader.readAsDataURL(file);
             });
         }
+
+        // Allow Enter key to trigger view
+        document.getElementById('viewMobile').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                viewSharedFiles();
+            }
+        });
 
         window.onload = function() {
             console.log('🌿 Jumbotail Customer Portal loaded!');
