@@ -47,6 +47,8 @@
         .btn-success:hover { background: #38a169; }
         .btn-primary { background: #667eea; color: white; }
         .btn-primary:hover { background: #5a67d8; }
+        .btn-excel { background: #1d6f42; color: white; }
+        .btn-excel:hover { background: #155d36; }
         .admin-login {
             max-width: 400px;
             margin: 40px auto;
@@ -189,19 +191,6 @@
             padding: 40px;
             color: #718096;
         }
-        .download-all {
-            background: #48bb78;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-        .download-all:hover {
-            background: #38a169;
-        }
         .sync-status {
             background: #ebf8ff;
             padding: 10px 15px;
@@ -328,13 +317,13 @@
                     <h3>All Uploads</h3>
                     <div class="admin-actions">
                         <button class="refresh-btn" onclick="loadUploads()">🔄 Refresh</button>
-                        <button class="download-all" onclick="downloadAllFiles()">📥 Download All</button>
+                        <button class="btn btn-excel" onclick="downloadExcel()">📊 Download Excel</button>
                         <button class="btn btn-danger" onclick="adminLogout()" style="width:auto; padding:8px 20px;">🚪 Logout</button>
                     </div>
                 </div>
 
                 <div class="sync-status">
-                    <span class="status-text">💾 Data is stored in GitHub repository (shared across all admins)</span>
+                    <span class="status-text">☁️ Images stored permanently on Cloudinary (NEVER expire!)</span>
                     <span id="uploadCount" style="font-weight:600; color:#667eea;"></span>
                 </div>
 
@@ -352,13 +341,13 @@
 
     <script>
         // ============================================================
-        //  🔐 CONFIGURATION - EDIT THESE TWO LINES ONLY!
+        //  🔐 CONFIGURATION
         // ============================================================
         const ADMIN_PASSWORD = 'admin123';  // ← CHANGE THIS PASSWORD!
-        const GITHUB_TOKEN = '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';  // ← Get from https://github.com/settings/tokens (No Expiration!)
+        const GITHUB_TOKEN = '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';
         
         // ============================================================
-        //  GITHUB SETTINGS (Don't change these)
+        //  GITHUB SETTINGS
         // ============================================================
         const GITHUB_OWNER = 'shifajt';
         const GITHUB_REPO = 'customer-upload-portal';
@@ -444,6 +433,76 @@
             }
         }
 
+        // ============================================================
+        //  📊 DOWNLOAD EXCEL WITH IMAGE URLS
+        // ============================================================
+        function downloadExcel() {
+            if (allUploads.length === 0) {
+                showToast('No uploads to download', 'error');
+                return;
+            }
+
+            try {
+                let csvRows = [];
+                csvRows.push('Mobile Number,Date & Time,Latitude,Longitude,File Names,Image URLs,Status');
+                
+                allUploads.forEach((upload) => {
+                    const mobile = upload.mobile || '';
+                    const date = upload.timestamp ? new Date(upload.timestamp).toLocaleString() : '';
+                    
+                    let lat = '';
+                    let lng = '';
+                    if (upload.location) {
+                        lat = upload.location.lat || '';
+                        lng = upload.location.lng || '';
+                    }
+                    
+                    let fileNames = [];
+                    let fileUrls = [];
+                    
+                    upload.files.forEach((file) => {
+                        fileNames.push(file.name || 'Unnamed');
+                        if (file.url) {
+                            fileUrls.push(file.url);
+                        } else if (file.data) {
+                            fileUrls.push('[Local file - view in admin]');
+                        } else {
+                            fileUrls.push('No URL');
+                        }
+                    });
+                    
+                    const status = upload.viewed ? 'Viewed' : 'Pending';
+                    
+                    const fileNameStr = fileNames.join('; ');
+                    const fileUrlStr = fileUrls.join('; ');
+                    
+                    csvRows.push(`"${mobile}","${date}","${lat}","${lng}","${fileNameStr}","${fileUrlStr}","${status}"`);
+                });
+                
+                const csvContent = csvRows.join('\n');
+                const blob = new Blob(['\uFEFF' + csvContent], { 
+                    type: 'text/csv;charset=utf-8;' 
+                });
+                
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.href = url;
+                link.download = `uploads_${new Date().toISOString().slice(0,10)}.csv`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                showToast(`📊 Downloaded ${allUploads.length} uploads as Excel!`);
+            } catch (error) {
+                console.error('Download error:', error);
+                showToast('Error downloading: ' + error.message, 'error');
+            }
+        }
+
+        // ============================================================
+        //  RENDER ADMIN VIEW
+        // ============================================================
         function renderAdminView() {
             const filter = document.getElementById('filterMobile').value.trim().toLowerCase();
             let filtered = allUploads;
@@ -537,35 +596,6 @@
             showToast('🗑️ Deleted');
         }
 
-        function downloadAllFiles() {
-            if (allUploads.length === 0) {
-                showToast('No files to download', 'error');
-                return;
-            }
-            
-            let downloadText = '===== CUSTOMER UPLOADS =====\n\n';
-            allUploads.forEach((u, index) => {
-                downloadText += `--- Upload ${index + 1} ---\n`;
-                downloadText += `Mobile: ${u.mobile}\n`;
-                downloadText += `Date: ${new Date(u.timestamp).toLocaleString()}\n`;
-                downloadText += `Location: ${u.location ? u.location.lat + ', ' + u.location.lng : 'Not shared'}\n`;
-                downloadText += `Files: ${u.files.length}\n`;
-                u.files.forEach(f => {
-                    const url = f.url || f.data || 'No URL';
-                    downloadText += `  - ${f.name} (${(f.size/1024).toFixed(1)} KB) - ${url}\n`;
-                });
-                downloadText += `Status: ${u.viewed ? 'Viewed' : 'Pending'}\n\n`;
-            });
-
-            const blob = new Blob([downloadText], { type: 'text/plain' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `uploads_${new Date().toISOString().slice(0,10)}.txt`;
-            link.click();
-            URL.revokeObjectURL(link.href);
-            showToast('📥 Download started!');
-        }
-
         function showToast(msg, type = 'success') {
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
@@ -576,9 +606,8 @@
 
         window.onload = function() {
             console.log('🔐 Admin Dashboard loaded!');
-            if (!GITHUB_TOKEN || GITHUB_TOKEN === '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') {
-                console.warn('⚠️ Please set your GitHub token!');
-            }
+            console.log('☁️ Cloudinary configured for PERMANENT storage!');
+            console.log('✅ GitHub token configured!');
         };
     </script>
 </body>
