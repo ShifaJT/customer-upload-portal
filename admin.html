@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Jumbotail - Customer Upload Portal</title>
+    <title>Jumbotail - Admin Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -13,10 +13,7 @@
             padding: 20px;
             color: #1a202c;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+        .container { max-width: 1200px; margin: 0 auto; }
         
         /* ===== TOP BAR ===== */
         .top-bar {
@@ -51,359 +48,371 @@
             font-weight: 700;
             color: #1a3c2a;
         }
-        .logo-text span {
-            color: #d4a843;
-        }
-        .user-area {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .user-name {
-            color: #1a3c2a;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        .user-avatar {
-            background: #1a3c2a;
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 14px;
-        }
+        .logo-text span { color: #d4a843; }
         
-        /* ===== HERO ===== */
-        .hero {
-            background: linear-gradient(135deg, #1a3c2a 0%, #2d5a42 100%);
-            color: white;
-            padding: 40px 50px;
-            border-radius: 16px;
-            margin-bottom: 30px;
-            position: relative;
-            overflow: hidden;
-        }
-        .hero::after {
-            content: "🌿";
-            position: absolute;
-            right: 30px;
-            bottom: 20px;
-            font-size: 80px;
-            opacity: 0.1;
-        }
-        .hero h1 {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-        .hero .subtitle {
-            font-size: 16px;
-            opacity: 0.85;
-            margin-bottom: 4px;
-        }
-        .hero .tagline {
-            font-size: 14px;
-            opacity: 0.6;
-            font-style: italic;
-        }
-        
-        /* ===== HOW TO ACCESS ===== */
-        .access-section {
+        /* ===== DASHBOARD HEADER ===== */
+        .dashboard-header {
             background: white;
-            padding: 20px 24px;
+            padding: 24px 30px;
             border-radius: 12px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             border: 1px solid #e8edea;
-        }
-        .access-section h3 {
-            color: #1a3c2a;
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
-        .access-section .url-box {
-            background: #f5f5f0;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 14px;
-            color: #1a3c2a;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 15px;
         }
-        .access-section .url-box .url {
-            word-break: break-all;
-            color: #2b6cb0;
-        }
-        .access-section .url-box .copy-btn {
-            background: #1a3c2a;
-            color: white;
-            border: none;
-            padding: 6px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 13px;
-        }
-        .access-section .url-box .copy-btn:hover {
-            background: #2d5a42;
-        }
-        
-        /* ===== TEMPLATES ===== */
-        .section-title {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        .section-title h2 {
-            color: #1a3c2a;
-            font-size: 20px;
-            font-weight: 600;
-        }
-        .section-title .see-all {
-            color: #1a3c2a;
-            font-size: 14px;
-            cursor: pointer;
-            opacity: 0.7;
-        }
-        .section-title .see-all:hover {
-            opacity: 1;
-        }
-        
-        .templates-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 12px;
-            margin-bottom: 30px;
-        }
-        .template-card {
-            background: white;
-            border: 1px solid #e8edea;
-            border-radius: 10px;
-            padding: 16px 12px;
-            text-align: center;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-        .template-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-            border-color: #d4a843;
-        }
-        .template-card .number {
+        .dashboard-header h1 {
             font-size: 24px;
             font-weight: 700;
             color: #1a3c2a;
         }
-        .template-card .label {
-            font-size: 12px;
-            color: #718096;
-            margin-top: 4px;
-        }
-        .template-card.active {
-            border-color: #d4a843;
-            background: #fcf8f0;
-        }
-        .template-card.active .number {
-            color: #d4a843;
-        }
-        
-        /* ===== ELEMENTS MENU ===== */
-        .elements-menu {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 25px;
-            padding: 16px 0;
-            border-top: 1px solid #e8edea;
-            border-bottom: 1px solid #e8edea;
-        }
-        .element-item {
-            padding: 8px 18px;
-            border-radius: 20px;
+        .dashboard-header .subtitle {
             font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: #4a5568;
-            background: transparent;
-            border: 1px solid transparent;
+            color: #718096;
         }
-        .element-item:hover {
-            background: #e8edea;
-            color: #1a3c2a;
-        }
-        .element-item.active {
+        .btn-logout {
             background: #1a3c2a;
             color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
         }
-        .element-item .icon {
-            margin-right: 6px;
-        }
+        .btn-logout:hover { background: #2d5a42; }
         
-        /* ===== UPLOAD FORM ===== */
-        .upload-card {
+        /* ===== CARDS ===== */
+        .card {
             background: white;
             border-radius: 12px;
             padding: 24px;
             border: 1px solid #e8edea;
             margin-bottom: 20px;
         }
-        .upload-card h3 {
-            color: #1a3c2a;
-            font-size: 18px;
-            margin-bottom: 16px;
+        .card-header {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 10px;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 16px;
         }
-        .upload-card h3 .badge {
-            background: #d4a843;
-            color: white;
-            font-size: 11px;
-            padding: 2px 10px;
-            border-radius: 12px;
-        }
-        .form-group {
-            margin-bottom: 18px;
-        }
-        .form-group label {
-            display: block;
+        .card-header h3 {
+            font-size: 18px;
             font-weight: 600;
-            margin-bottom: 6px;
             color: #1a3c2a;
-            font-size: 14px;
         }
-        .form-group input[type="tel"] {
-            width: 100%;
-            padding: 12px 16px;
+        
+        /* ===== BUTTONS ===== */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary { background: #1a3c2a; color: white; }
+        .btn-primary:hover { background: #2d5a42; }
+        .btn-success { background: #2d7d46; color: white; }
+        .btn-success:hover { background: #1a5c32; }
+        .btn-danger { background: #c0392b; color: white; }
+        .btn-danger:hover { background: #a93226; }
+        .btn-excel { background: #1d6f42; color: white; }
+        .btn-excel:hover { background: #155d36; }
+        .btn-download { background: #5b6e5a; color: white; }
+        .btn-download:hover { background: #4a5d49; }
+        .btn-backup { background: #d4a843; color: #1a202c; }
+        .btn-backup:hover { background: #c49a3a; }
+        .btn-share { background: #3182ce; color: white; }
+        .btn-share:hover { background: #2b6cb0; }
+        .btn-outline { background: transparent; border: 1.5px solid #d1d5d0; color: #4a5568; }
+        .btn-outline:hover { background: #f5f5f0; }
+        .btn-sm { padding: 4px 12px; font-size: 12px; }
+        
+        .admin-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        
+        /* ===== STATS ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #f5f5f0;
+            padding: 18px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #e8edea;
+        }
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a3c2a;
+        }
+        .stat-card .label {
+            font-size: 13px;
+            color: #5b6e5a;
+            margin-top: 2px;
+        }
+        
+        /* ===== FILTER ===== */
+        .filter-box {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .filter-box input {
+            padding: 10px 16px;
             border: 1.5px solid #d1d5d0;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 14px;
             background: #fafaf8;
-            transition: border-color 0.2s;
+            flex: 1;
+            min-width: 200px;
         }
-        .form-group input[type="tel"]:focus {
+        .filter-box input:focus {
             outline: none;
             border-color: #1a3c2a;
             box-shadow: 0 0 0 3px rgba(26, 60, 42, 0.1);
         }
-        .file-drop {
+        .filter-box select {
+            padding: 10px 16px;
+            border: 1.5px solid #d1d5d0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #fafaf8;
+            cursor: pointer;
+        }
+        
+        /* ===== UPLOAD ITEMS ===== */
+        .upload-item {
+            border: 1px solid #e8edea;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: #fafaf8;
+            transition: all 0.15s;
+        }
+        .upload-item:hover { background: #f5f5f0; }
+        .upload-item .meta {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .upload-item .mobile {
+            font-weight: 600;
+            font-size: 15px;
+            color: #1a3c2a;
+        }
+        .upload-item .type-badge {
+            font-size: 11px;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        .type-badge.customer { background: #bee3f8; color: #2b6cb0; }
+        .type-badge.admin { background: #fefcbf; color: #975a16; }
+        .upload-item .time {
+            color: #718096;
+            font-size: 13px;
+        }
+        .upload-item .files {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0 12px 0;
+        }
+        .upload-item .file-preview {
+            background: white;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #e8edea;
+            text-align: center;
+            width: 120px;
+            position: relative;
+            transition: all 0.15s;
+        }
+        .upload-item .file-preview:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+        .upload-item .file-preview img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        .upload-item .file-preview .file-icon {
+            font-size: 40px;
+            padding: 20px 0;
+        }
+        .upload-item .file-preview .file-name {
+            font-size: 11px;
+            color: #4a5568;
+            margin-top: 4px;
+            word-break: break-all;
+            max-height: 28px;
+            overflow: hidden;
+        }
+        .upload-item .file-preview .file-size {
+            font-size: 10px;
+            color: #a0aec0;
+        }
+        .upload-item .file-preview .cloud-badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: #2d7d46;
+            color: white;
+            font-size: 8px;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+        .upload-item .file-preview .download-icon {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: #1a3c2a;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            cursor: pointer;
+        }
+        .upload-item .file-preview:hover .download-icon { opacity: 1; }
+        
+        .upload-item .message-box {
+            background: #f0f5f2;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin: 6px 0;
+            font-size: 14px;
+            color: #4a5568;
+        }
+        
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-pending { background: #fefcbf; color: #975a16; }
+        .badge-viewed { background: #c6f6d5; color: #22543d; }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .action-buttons .btn { padding: 5px 14px; font-size: 12px; }
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+        
+        /* ===== SHARE MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal h3 { margin-bottom: 16px; color: #1a3c2a; }
+        .modal .form-group { margin-bottom: 16px; }
+        .modal .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 14px;
+            color: #1a3c2a;
+        }
+        .modal .form-group input,
+        .modal .form-group textarea,
+        .modal .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid #d1d5d0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #fafaf8;
+        }
+        .modal .form-group textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+        .modal .form-group input:focus,
+        .modal .form-group textarea:focus {
+            outline: none;
+            border-color: #1a3c2a;
+            box-shadow: 0 0 0 3px rgba(26, 60, 42, 0.1);
+        }
+        .modal .btn { width: 100%; padding: 12px; }
+        .modal .file-drop-small {
             border: 2px dashed #d1d5d0;
-            padding: 30px 20px;
+            padding: 20px;
             text-align: center;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s;
             background: #fafaf8;
         }
-        .file-drop:hover {
+        .modal .file-drop-small:hover {
             border-color: #1a3c2a;
             background: #f0f5f2;
         }
-        .file-drop .icon { font-size: 36px; display: block; margin-bottom: 6px; }
-        .file-drop .text { font-weight: 500; color: #1a3c2a; }
-        .file-drop .subtext { font-size: 13px; color: #718096; margin-top: 4px; }
-        .file-drop input[type="file"] { display: none; }
-        .file-list {
+        .modal .file-drop-small input { display: none; }
+        .modal .file-drop-small .icon { font-size: 28px; display: block; }
+        .modal .file-drop-small .text { font-size: 13px; color: #1a3c2a; }
+        .modal .file-list-small {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 12px;
+            gap: 6px;
+            margin-top: 8px;
         }
-        .file-tag {
+        .modal .file-list-small .file-tag {
             background: #e8edea;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 13px;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 12px;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             color: #1a3c2a;
         }
-        .file-tag .remove {
+        .modal .file-list-small .file-tag .remove {
             color: #c0392b;
             cursor: pointer;
             font-weight: 700;
-        }
-        .btn {
-            padding: 14px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-primary {
-            background: #d4a843;
-            color: #1a202c;
-            width: 100%;
-        }
-        .btn-primary:hover {
-            background: #c49a3a;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(212, 168, 67, 0.3);
-        }
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        .btn-secondary {
-            background: #1a3c2a;
-            color: white;
-            width: auto;
-            padding: 10px 20px;
-        }
-        .btn-secondary:hover { background: #2d5a42; }
-        .location-btn {
-            background: #1a3c2a;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-        .location-btn:hover { background: #2d5a42; }
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: #e2e8f0;
-            border-radius: 4px;
-            margin-top: 12px;
-            overflow: hidden;
-        }
-        .progress-bar .fill {
-            height: 100%;
-            background: #d4a843;
-            width: 0%;
-            transition: width 0.3s;
-            border-radius: 4px;
-        }
-        
-        /* ===== FOOTER ===== */
-        .footer {
-            text-align: center;
-            color: #a0aec0;
-            font-size: 12px;
-            padding-top: 16px;
-            border-top: 1px solid #e8edea;
-            margin-top: 20px;
-        }
-        .footer .brand {
-            color: #1a3c2a;
-            font-weight: 600;
         }
         
         /* ===== TOAST ===== */
@@ -428,149 +437,187 @@
             to { opacity: 1; transform: translate(-50%, 0); }
         }
         
-        /* ===== NHT BANNER ===== */
-        .nht-banner {
-            background: #1a3c2a;
-            color: white;
-            padding: 8px 20px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 13px;
-            margin-bottom: 20px;
-            letter-spacing: 1px;
+        /* ===== LIGHTBOX ===== */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 9998;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
         }
-        .nht-banner span {
-            color: #d4a843;
+        .lightbox.active { display: flex; }
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .lightbox .close {
+            position: absolute;
+            top: 20px; right: 30px;
+            color: white;
+            font-size: 40px;
+            font-weight: 300;
+            cursor: pointer;
         }
         
-        @media (max-width: 768px) {
-            .hero { padding: 30px 24px; }
-            .hero h1 { font-size: 24px; }
+        /* ===== LOGIN ===== */
+        .login-card {
+            max-width: 400px;
+            margin: 80px auto;
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            border: 1px solid #e8edea;
+        }
+        .login-card .logo-icon {
+            margin: 0 auto 16px;
+            background: #1a3c2a;
+            color: #d4a843;
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .login-card h2 {
+            color: #1a3c2a;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+        .login-card input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #d1d5d0;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            background: #fafaf8;
+        }
+        .login-card input:focus {
+            outline: none;
+            border-color: #1a3c2a;
+            box-shadow: 0 0 0 3px rgba(26, 60, 42, 0.1);
+        }
+        .login-card .btn { width: 100%; padding: 12px; }
+        
+        @media (max-width: 640px) {
+            .dashboard-header { flex-direction: column; align-items: stretch; text-align: center; }
+            .card-header { flex-direction: column; align-items: stretch; }
+            .admin-actions { justify-content: center; }
+            .upload-item .file-preview { width: 90px; }
+            .upload-item .file-preview img { width: 70px; height: 70px; }
             .top-bar { flex-direction: column; align-items: stretch; text-align: center; }
             .logo-area { justify-content: center; }
-            .user-area { justify-content: center; }
-            .templates-grid { grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); }
-            .elements-menu { justify-content: center; }
+            .filter-box { flex-direction: column; }
         }
     </style>
 </head>
 <body>
     <div class="container">
 
-        <!-- ===== TOP BAR ===== -->
-        <div class="top-bar">
-            <div class="logo-area">
-                <div class="logo-icon">J</div>
-                <div class="logo-text">Jumbotail<span>.</span></div>
-            </div>
-            <div class="user-area">
-                <span class="user-name">Sheefa S</span>
-                <div class="user-avatar">S</div>
-            </div>
+        <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+            <span class="close">&times;</span>
+            <img id="lightboxImg" src="" alt="Preview" />
         </div>
 
-        <!-- ===== NHT BANNER ===== -->
-        <div class="nht-banner">
-            🌿 NHT Content <span>2024</span>
-        </div>
-
-        <!-- ===== HERO ===== -->
-        <div class="hero">
-            <h1>📤 Customer Upload Portal</h1>
-            <div class="subtitle">Securely upload your images, videos, and documents</div>
-            <div class="tagline">Jai Jawan, Jai Kisan, Jai Dukaan</div>
-        </div>
-
-        <!-- ===== HOW TO ACCESS ===== -->
-        <div class="access-section">
-            <h3>🔗 HOW TO ACCESS THE JUMBOTAIL APPLICATION?</h3>
-            <div class="url-box">
-                <span class="url">https://shifajt.github.io/customer-upload-portal/</span>
-                <button class="copy-btn" onclick="copyURL()">📋 Copy</button>
-            </div>
-        </div>
-
-        <!-- ===== TEMPLATES ===== -->
-        <div class="section-title">
-            <h2>📋 Templates</h2>
-            <span class="see-all">View All →</span>
-        </div>
-        <div class="templates-grid" id="templatesGrid">
-            <div class="template-card active"><div class="number">1</div><div class="label">Upload</div></div>
-            <div class="template-card"><div class="number">2</div><div class="label">Documents</div></div>
-            <div class="template-card"><div class="number">3</div><div class="label">Images</div></div>
-            <div class="template-card"><div class="number">4</div><div class="label">Videos</div></div>
-            <div class="template-card"><div class="number">5</div><div class="label">Reports</div></div>
-            <div class="template-card"><div class="number">6</div><div class="label">Forms</div></div>
-            <div class="template-card"><div class="number">7</div><div class="label">Invoices</div></div>
-            <div class="template-card"><div class="number">8</div><div class="label">Contracts</div></div>
-            <div class="template-card"><div class="number">9</div><div class="label">Receipts</div></div>
-            <div class="template-card"><div class="number">10</div><div class="label">Others</div></div>
-        </div>
-
-        <!-- ===== ELEMENTS MENU ===== -->
-        <div class="elements-menu">
-            <div class="element-item active"><span class="icon">📝</span>Text</div>
-            <div class="element-item"><span class="icon">🏷️</span>Brand</div>
-            <div class="element-item"><span class="icon">📤</span>Uploads</div>
-            <div class="element-item"><span class="icon">🔧</span>Tools</div>
-            <div class="element-item"><span class="icon">📁</span>Projects</div>
-        </div>
-
-        <!-- ===== UPLOAD FORM ===== -->
-        <div class="upload-card">
-            <h3>
-                📎 Upload Files
-                <span class="badge">NEW</span>
-            </h3>
-
-            <form id="uploadForm" onsubmit="handleSubmit(event)">
-                <div class="form-group">
-                    <label for="mobile">📱 Mobile Number *</label>
-                    <input type="tel" id="mobile" placeholder="Enter 10-digit mobile number" 
-                           pattern="[0-9]{10}" required />
-                </div>
-
-                <div class="form-group">
-                    <label>📎 Select Files *</label>
-                    <div class="file-drop" onclick="document.getElementById('fileInput').click()">
-                        <span class="icon">📁</span>
-                        <div class="text">Click to select files</div>
-                        <div class="subtext">Images, Videos, PDF, Word (Max 25MB each)</div>
-                        <input type="file" id="fileInput" multiple 
-                               accept="image/*,video/*,.pdf,.doc,.docx" />
+        <!-- ===== SHARE MODAL ===== -->
+        <div class="modal-overlay" id="shareModal">
+            <div class="modal">
+                <h3>📤 Share Files with Customer</h3>
+                <form id="shareForm" onsubmit="handleShareSubmit(event)">
+                    <div class="form-group">
+                        <label>📱 Customer Mobile Number *</label>
+                        <input type="tel" id="shareMobile" placeholder="Enter 10-digit mobile number" 
+                               pattern="[0-9]{10}" required />
                     </div>
-                    <div id="fileList" class="file-list"></div>
-                    <div id="fileCount" style="font-size: 13px; color: #718096; margin-top: 6px;"></div>
-                </div>
-
-                <div class="form-group">
-                    <label>📍 Location (Optional)</label>
-                    <button type="button" class="location-btn" onclick="getLocation()">
-                        📍 Share My Location
-                    </button>
-                    <div id="locationDisplay" style="margin-top: 8px; font-size: 14px; color: #4a5568;"></div>
-                </div>
-
-                <div class="progress-bar" id="progressBar" style="display:none;">
-                    <div class="fill" id="progressFill"></div>
-                </div>
-
-                <button type="submit" class="btn btn-primary" id="submitBtn">
-                    🚀 Submit
-                </button>
-            </form>
+                    <div class="form-group">
+                        <label>💬 Message (Optional)</label>
+                        <textarea id="shareMessage" placeholder="Add a message for the customer..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>📎 Select Files *</label>
+                        <div class="file-drop-small" onclick="document.getElementById('shareFileInput').click()">
+                            <span class="icon">📁</span>
+                            <div class="text">Click to select files</div>
+                            <input type="file" id="shareFileInput" multiple 
+                                   accept="image/*,video/*,.pdf,.doc,.docx" />
+                        </div>
+                        <div id="shareFileList" class="file-list-small"></div>
+                    </div>
+                    <button type="submit" class="btn btn-share">📤 Share with Customer</button>
+                    <button type="button" class="btn btn-outline" onclick="closeShareModal()" style="margin-top:8px;">Cancel</button>
+                </form>
+            </div>
         </div>
 
-        <div class="footer">
-            © 2024 <span class="brand">Jumbotail</span> • NHT Content • All rights reserved
+        <!-- ===== LOGIN ===== -->
+        <div id="loginScreen">
+            <div class="login-card">
+                <div class="logo-icon">J</div>
+                <h2>Admin Dashboard</h2>
+                <input type="password" id="adminPassword" placeholder="Enter admin password" />
+                <button class="btn btn-primary" onclick="adminLogin()">Login</button>
+            </div>
+        </div>
+
+        <!-- ===== DASHBOARD ===== -->
+        <div id="dashboardScreen" style="display:none;">
+            <div class="top-bar">
+                <div class="logo-area">
+                    <div class="logo-icon">J</div>
+                    <div class="logo-text">Jumbotail<span>.</span></div>
+                </div>
+            </div>
+
+            <div class="dashboard-header">
+                <div>
+                    <h1>📋 Admin Dashboard</h1>
+                    <div class="subtitle">Manage customer uploads & share files with customers</div>
+                </div>
+                <button class="btn-logout" onclick="adminLogout()">🚪 Logout</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>All Uploads & Shared Files</h3>
+                    <div class="admin-actions">
+                        <button class="btn btn-share" onclick="openShareModal()">📤 Share Files</button>
+                        <button class="btn btn-primary" onclick="loadUploads()">🔄 Refresh</button>
+                        <button class="btn btn-excel" onclick="downloadExcel()">📊 Excel</button>
+                        <button class="btn btn-download" onclick="downloadAllImages()">📸 Images</button>
+                    </div>
+                </div>
+
+                <div class="stats-grid" id="statsContainer"></div>
+
+                <div class="filter-box">
+                    <input type="text" id="filterMobile" placeholder="🔍 Filter by mobile number..." 
+                           oninput="renderAdminView()" />
+                    <select id="filterType" onchange="renderAdminView()">
+                        <option value="all">All Types</option>
+                        <option value="customer_upload">Customer Uploads</option>
+                        <option value="admin_share">Admin Shared</option>
+                    </select>
+                </div>
+
+                <div id="uploadsList"></div>
+            </div>
         </div>
     </div>
 
     <script>
         // ============================================================
-        //  🔑 CONFIGURATION
+        //  🔐 CONFIGURATION
         // ============================================================
+        const ADMIN_PASSWORD = 'admin123';
         const GITHUB_TOKEN = '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';
         const GITHUB_OWNER = 'shifajt';
         const GITHUB_REPO = 'customer-upload-portal';
@@ -579,119 +626,235 @@
         const CLOUDINARY_CLOUD_NAME = 'vcr5gfhi';
         const CLOUDINARY_API_KEY = '954166197462943';
 
-        // ============================================================
-        //  APP STATE
-        // ============================================================
-        let selectedFiles = [];
-        let userLocation = null;
+        let allUploads = [];
+        let isAdmin = false;
+        let shareFiles = [];
 
         // ============================================================
-        //  UI FUNCTIONS
+        //  AUTH FUNCTIONS
         // ============================================================
-        document.getElementById('fileInput').addEventListener('change', function(e) {
+        function adminLogin() {
+            const pwd = document.getElementById('adminPassword').value;
+            if (pwd === ADMIN_PASSWORD) {
+                isAdmin = true;
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('dashboardScreen').style.display = 'block';
+                loadUploads();
+                showToast('✅ Logged in successfully!');
+            } else {
+                showToast('❌ Wrong password!', 'error');
+            }
+        }
+
+        function adminLogout() {
+            isAdmin = false;
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('dashboardScreen').style.display = 'none';
+            document.getElementById('adminPassword').value = '';
+        }
+
+        // ============================================================
+        //  SHARE MODAL
+        // ============================================================
+        function openShareModal() {
+            document.getElementById('shareModal').classList.add('active');
+            shareFiles = [];
+            document.getElementById('shareFileList').innerHTML = '';
+            document.getElementById('shareMobile').value = '';
+            document.getElementById('shareMessage').value = '';
+            document.getElementById('shareFileInput').value = '';
+        }
+
+        function closeShareModal() {
+            document.getElementById('shareModal').classList.remove('active');
+        }
+
+        document.getElementById('shareFileInput').addEventListener('change', function(e) {
             const files = this.files;
             if (files.length > 0) {
-                handleFiles(files);
+                for (let f of files) {
+                    shareFiles.push(f);
+                }
+                renderShareFileList();
             }
         });
 
-        function handleFiles(files) {
-            const validFiles = [];
-            for (let f of files) {
-                const isValidType = f.type.startsWith('image/') || 
-                                   f.type.startsWith('video/') || 
-                                   f.name.endsWith('.pdf') || 
-                                   f.name.endsWith('.doc') || 
-                                   f.name.endsWith('.docx');
-                const isValidSize = f.size <= 25 * 1024 * 1024;
-                if (isValidType && isValidSize) {
-                    validFiles.push(f);
-                }
-            }
-            if (validFiles.length !== files.length) {
-                showToast('Some files were skipped. Only images, videos, PDFs, and Word docs under 25MB allowed.', 'error');
-            }
-            selectedFiles = [...selectedFiles, ...validFiles];
-            renderFileList();
-        }
-
-        function renderFileList() {
-            const container = document.getElementById('fileList');
-            const countDisplay = document.getElementById('fileCount');
-            if (selectedFiles.length === 0) {
+        function renderShareFileList() {
+            const container = document.getElementById('shareFileList');
+            if (shareFiles.length === 0) {
                 container.innerHTML = '';
-                countDisplay.textContent = '';
                 return;
             }
-            container.innerHTML = selectedFiles.map((f, i) => `
+            container.innerHTML = shareFiles.map((f, i) => `
                 <span class="file-tag">
                     📎 ${f.name} (${(f.size/1024).toFixed(1)} KB)
-                    <span class="remove" onclick="removeFile(${i})">✕</span>
+                    <span class="remove" onclick="removeShareFile(${i})">✕</span>
                 </span>
             `).join('');
-            countDisplay.textContent = `${selectedFiles.length} file(s) selected (${(selectedFiles.reduce((a,b) => a + b.size, 0)/1024/1024).toFixed(1)} MB total)`;
         }
 
-        function removeFile(index) {
-            selectedFiles.splice(index, 1);
-            renderFileList();
+        function removeShareFile(index) {
+            shareFiles.splice(index, 1);
+            renderShareFileList();
         }
 
-        function getLocation() {
-            if (!navigator.geolocation) {
-                showToast('Geolocation not supported by this browser', 'error');
-                document.getElementById('locationDisplay').innerHTML = '❌ Geolocation not supported';
+        // ============================================================
+        //  HANDLE SHARE SUBMIT (Admin Sharing with Customer)
+        // ============================================================
+        async function handleShareSubmit(e) {
+            e.preventDefault();
+            const mobile = document.getElementById('shareMobile').value.trim();
+            const message = document.getElementById('shareMessage').value.trim();
+
+            if (!mobile || mobile.length !== 10) {
+                showToast('Please enter a valid 10-digit mobile number', 'error');
                 return;
             }
-            
-            document.getElementById('locationDisplay').innerHTML = '⏳ Getting location...';
-            
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    userLocation = {
-                        lat: pos.coords.latitude,
-                        lng: pos.coords.longitude
-                    };
-                    document.getElementById('locationDisplay').innerHTML = 
-                        `✅ Location: ${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}`;
-                    showToast('📍 Location shared successfully!');
-                },
-                (error) => {
-                    console.error('Location error:', error);
-                    let msg = 'Unable to get location. ';
-                    if (error.code === 1) msg += 'Please allow location access.';
-                    else if (error.code === 2) msg += 'Location unavailable.';
-                    else if (error.code === 3) msg += 'Location request timed out.';
-                    showToast(msg, 'error');
-                    document.getElementById('locationDisplay').innerHTML = `❌ ${msg}`;
+            if (shareFiles.length === 0) {
+                showToast('Please select at least one file to share', 'error');
+                return;
+            }
+
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = '⏳ Uploading...';
+
+            try {
+                const uploadedFiles = [];
+                for (let file of shareFiles) {
+                    if (file.type.startsWith('image/')) {
+                        try {
+                            const result = await uploadToCloudinary(file);
+                            uploadedFiles.push(result);
+                        } catch (err) {
+                            console.error('Cloudinary upload failed:', err);
+                            const dataUrl = await readFileAsDataURL(file);
+                            uploadedFiles.push({
+                                name: file.name,
+                                type: file.type,
+                                size: file.size,
+                                data: dataUrl,
+                                cloud: false
+                            });
+                        }
+                    } else {
+                        const dataUrl = await readFileAsDataURL(file);
+                        uploadedFiles.push({
+                            name: file.name,
+                            type: file.type,
+                            size: file.size,
+                            data: dataUrl,
+                            cloud: false
+                        });
+                    }
                 }
-            );
+
+                const { data: existingData, sha } = await loadFromGitHub();
+                const shareEntry = {
+                    id: Date.now().toString(),
+                    type: 'admin_share',
+                    mobile: mobile,
+                    files: uploadedFiles,
+                    message: message || '',
+                    timestamp: new Date().toISOString(),
+                    viewed: false,
+                    direction: 'admin_to_customer'
+                };
+                existingData.unshift(shareEntry);
+                await saveToGitHub(existingData, sha);
+
+                closeShareModal();
+                showToast('✅ Files shared with customer!');
+                loadUploads();
+
+            } catch (err) {
+                console.error('Share error:', err);
+                showToast('❌ Failed to share: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '📤 Share with Customer';
+            }
         }
 
-        function copyURL() {
-            const url = 'https://shifajt.github.io/customer-upload-portal/';
-            navigator.clipboard.writeText(url).then(() => {
-                showToast('✅ URL copied to clipboard!');
-            }).catch(() => {
-                // Fallback
-                const input = document.createElement('input');
-                input.value = url;
-                document.body.appendChild(input);
-                input.select();
-                document.execCommand('copy');
-                document.body.removeChild(input);
-                showToast('✅ URL copied to clipboard!');
-            });
+        // ============================================================
+        //  LIGHTBOX
+        // ============================================================
+        function openLightbox(imageUrl) {
+            document.getElementById('lightboxImg').src = imageUrl;
+            document.getElementById('lightbox').classList.add('active');
         }
 
-        function showToast(msg, type = 'success') {
-            const existing = document.querySelector('.toast');
-            if (existing) existing.remove();
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = msg;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 4000);
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+        // ============================================================
+        //  GITHUB STORAGE
+        // ============================================================
+        async function loadFromGitHub() {
+            try {
+                const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/uploads.json`;
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    const content = atob(data.content);
+                    return { data: JSON.parse(content), sha: data.sha };
+                } else if (response.status === 404) {
+                    return { data: [], sha: null };
+                } else {
+                    throw new Error('Failed to load');
+                }
+            } catch (e) {
+                console.error('Load error:', e);
+                const localData = localStorage.getItem('uploads');
+                return { data: localData ? JSON.parse(localData) : [], sha: null };
+            }
+        }
+
+        async function saveToGitHub(data, sha) {
+            try {
+                const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/uploads.json`;
+                const body = {
+                    message: `Update uploads - ${new Date().toISOString()}`,
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))),
+                    branch: GITHUB_BRANCH
+                };
+                if (sha) body.sha = sha;
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify(body)
+                });
+                if (!response.ok) throw new Error('Failed to save');
+                localStorage.setItem('uploads', JSON.stringify(data));
+                return true;
+            } catch (e) {
+                console.error('Save error:', e);
+                localStorage.setItem('uploads', JSON.stringify(data));
+                return false;
+            }
+        }
+
+        async function loadUploads() {
+            try {
+                const { data, sha } = await loadFromGitHub();
+                allUploads = data;
+                renderAdminView();
+                return allUploads;
+            } catch (e) {
+                showToast('Error loading data: ' + e.message, 'error');
+                return [];
+            }
         }
 
         // ============================================================
@@ -732,157 +895,6 @@
             });
         }
 
-        // ============================================================
-        //  GITHUB STORAGE
-        // ============================================================
-        async function loadFromGitHub() {
-            try {
-                const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/uploads.json`;
-                const response = await fetch(url, {
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    const content = atob(data.content);
-                    return { data: JSON.parse(content), sha: data.sha };
-                } else if (response.status === 404) {
-                    return { data: [], sha: null };
-                } else {
-                    throw new Error('Failed to load data from GitHub');
-                }
-            } catch (e) {
-                console.error('GitHub load error:', e);
-                const localData = localStorage.getItem('uploads');
-                return { data: localData ? JSON.parse(localData) : [], sha: null };
-            }
-        }
-
-        async function saveToGitHub(data, sha) {
-            try {
-                const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/uploads.json`;
-                const body = {
-                    message: `Update uploads - ${new Date().toISOString()}`,
-                    content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))),
-                    branch: GITHUB_BRANCH
-                };
-                if (sha) body.sha = sha;
-                const response = await fetch(url, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/vnd.github.v3+json'
-                    },
-                    body: JSON.stringify(body)
-                });
-                if (!response.ok) throw new Error('Failed to save to GitHub');
-                localStorage.setItem('uploads', JSON.stringify(data));
-                return true;
-            } catch (e) {
-                console.error('GitHub save error:', e);
-                localStorage.setItem('uploads', JSON.stringify(data));
-                showToast('⚠️ Saved locally only (GitHub sync failed)', 'warning');
-                return false;
-            }
-        }
-
-        // ============================================================
-        //  SUBMIT HANDLER
-        // ============================================================
-        async function handleSubmit(e) {
-            e.preventDefault();
-            const mobile = document.getElementById('mobile').value.trim();
-            if (!mobile || mobile.length !== 10) {
-                showToast('Please enter a valid 10-digit mobile number', 'error');
-                return;
-            }
-            if (selectedFiles.length === 0) {
-                showToast('Please select at least one file', 'error');
-                return;
-            }
-
-            const btn = document.getElementById('submitBtn');
-            const progressBar = document.getElementById('progressBar');
-            const progressFill = document.getElementById('progressFill');
-            
-            btn.disabled = true;
-            btn.textContent = '⏳ Uploading to Cloud...';
-            progressBar.style.display = 'block';
-            progressFill.style.width = '0%';
-
-            try {
-                const totalFiles = selectedFiles.length;
-                const uploadedFiles = [];
-                for (let i = 0; i < selectedFiles.length; i++) {
-                    const file = selectedFiles[i];
-                    const percent = ((i) / totalFiles) * 100;
-                    progressFill.style.width = percent + '%';
-                    btn.textContent = `⏳ Uploading ${i+1}/${totalFiles}...`;
-
-                    if (file.type.startsWith('image/')) {
-                        try {
-                            const result = await uploadToCloudinary(file);
-                            uploadedFiles.push(result);
-                        } catch (err) {
-                            console.error('Cloudinary upload failed:', err);
-                            const dataUrl = await readFileAsDataURL(file);
-                            uploadedFiles.push({
-                                name: file.name,
-                                type: file.type,
-                                size: file.size,
-                                data: dataUrl,
-                                cloud: false
-                            });
-                        }
-                    } else {
-                        const dataUrl = await readFileAsDataURL(file);
-                        uploadedFiles.push({
-                            name: file.name,
-                            type: file.type,
-                            size: file.size,
-                            data: dataUrl,
-                            cloud: false
-                        });
-                    }
-                }
-
-                progressFill.style.width = '100%';
-                btn.textContent = '💾 Saving...';
-                const { data: existingData, sha } = await loadFromGitHub();
-                const upload = {
-                    id: Date.now().toString(),
-                    mobile: mobile,
-                    files: uploadedFiles,
-                    location: userLocation,
-                    timestamp: new Date().toISOString(),
-                    viewed: false
-                };
-                existingData.unshift(upload);
-                await saveToGitHub(existingData, sha);
-
-                selectedFiles = [];
-                userLocation = null;
-                document.getElementById('mobile').value = '';
-                document.getElementById('fileList').innerHTML = '';
-                document.getElementById('fileCount').textContent = '';
-                document.getElementById('locationDisplay').innerHTML = '';
-                document.getElementById('fileInput').value = '';
-
-                showToast('✅ Upload successful! Stored permanently.');
-            } catch (err) {
-                console.error('Upload error:', err);
-                showToast('❌ Upload failed: ' + err.message, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = '🚀 Submit';
-                progressBar.style.display = 'none';
-                progressFill.style.width = '0%';
-            }
-        }
-
         function readFileAsDataURL(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -893,33 +905,252 @@
         }
 
         // ============================================================
-        //  TEMPLATE CLICK
+        //  DOWNLOAD FUNCTIONS
         // ============================================================
-        document.querySelectorAll('.template-card').forEach(card => {
-            card.addEventListener('click', function() {
-                document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
-                const num = this.querySelector('.number').textContent;
-                showToast(`📋 Template ${num} selected`);
+        async function downloadAllImages() {
+            const imageUrls = [];
+            allUploads.forEach(upload => {
+                upload.files.forEach(file => {
+                    if (file.url && file.type && file.type.startsWith('image/')) {
+                        let cleanUrl = file.url.replace(/;\s*$/, '').trim();
+                        imageUrls.push({ url: cleanUrl, name: file.name || 'image.jpg' });
+                    }
+                });
             });
-        });
+
+            if (imageUrls.length === 0) {
+                showToast('No images found to download', 'warning');
+                return;
+            }
+
+            try {
+                const zip = new JSZip();
+                let downloaded = 0;
+                for (let item of imageUrls) {
+                    try {
+                        const response = await fetch(item.url);
+                        const blob = await response.blob();
+                        zip.file(item.name, blob);
+                    } catch (err) {
+                        console.error('Failed to download:', item.url, err);
+                    }
+                    downloaded++;
+                }
+
+                const zipBlob = await zip.generateAsync({ type: 'blob' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(zipBlob);
+                link.download = `images_${new Date().toISOString().slice(0,10)}.zip`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+
+                showToast(`📸 Downloaded images as ZIP!`);
+            } catch (error) {
+                console.error('Download error:', error);
+                showToast('Error downloading images: ' + error.message, 'error');
+            }
+        }
+
+        function downloadExcel() {
+            if (allUploads.length === 0) {
+                showToast('No uploads to download', 'error');
+                return;
+            }
+
+            try {
+                let html = `
+                    <html xmlns:o="urn:schemas-microsoft-com:office:office" 
+                          xmlns:x="urn:schemas-microsoft-com:office:excel" 
+                          xmlns="http://www.w3.org/TR/REC-html40">
+                    <head><meta charset="UTF-8">
+                    <style>
+                        table { border-collapse: collapse; width: 100%; }
+                        th { background-color: #1a3c2a; color: white; padding: 10px; border: 1px solid #ddd; }
+                        td { padding: 8px; border: 1px solid #ddd; }
+                    </style>
+                    </head>
+                    <body><table>
+                        <tr>
+                            <th>#</th><th>Type</th><th>Mobile</th><th>Date</th>
+                            <th>Files</th><th>URLs</th><th>Message</th><th>Status</th>
+                        </tr>
+                `;
+
+                allUploads.forEach((upload, index) => {
+                    const type = upload.type === 'admin_share' ? 'Admin Shared' : 'Customer Upload';
+                    const mobile = upload.mobile || '';
+                    const date = upload.timestamp ? new Date(upload.timestamp).toLocaleString() : '';
+                    let fileNames = [], fileUrls = [];
+                    upload.files.forEach((file) => {
+                        fileNames.push(file.name || 'Unnamed');
+                        let url = file.url || file.data || '';
+                        if (url) {
+                            url = url.replace(/;\s*$/, '').trim();
+                            fileUrls.push(url);
+                        } else {
+                            fileUrls.push('Local file');
+                        }
+                    });
+                    const status = upload.viewed ? 'Viewed' : 'Pending';
+                    const message = upload.message || '';
+                    html += `
+                        <tr>
+                            <td>${index+1}</td>
+                            <td>${type}</td>
+                            <td>${mobile}</td>
+                            <td>${date}</td>
+                            <td>${fileNames.join('; ')}</td>
+                            <td><a href="${fileUrls.join('; ')}" target="_blank">${fileUrls.join('; ')}</a></td>
+                            <td>${message}</td>
+                            <td>${status}</td>
+                        </tr>
+                    `;
+                });
+
+                html += `</table></body></html>`;
+                const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `uploads_${new Date().toISOString().slice(0,10)}.xls`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+                showToast(`✅ Downloaded ${allUploads.length} uploads as Excel!`);
+            } catch (error) {
+                console.error('Download error:', error);
+                showToast('Error downloading: ' + error.message, 'error');
+            }
+        }
 
         // ============================================================
-        //  ELEMENTS CLICK
+        //  RENDER ADMIN VIEW
         // ============================================================
-        document.querySelectorAll('.element-item').forEach(item => {
-            item.addEventListener('click', function() {
-                document.querySelectorAll('.element-item').forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
-                const text = this.textContent.trim();
-                showToast(`🔧 ${text} selected`);
-            });
-        });
+        function renderAdminView() {
+            const filterMobile = document.getElementById('filterMobile').value.trim().toLowerCase();
+            const filterType = document.getElementById('filterType').value;
+
+            let filtered = allUploads;
+            if (filterMobile) {
+                filtered = filtered.filter(u => u.mobile && u.mobile.includes(filterMobile));
+            }
+            if (filterType !== 'all') {
+                filtered = filtered.filter(u => u.type === filterType);
+            }
+
+            const total = allUploads.length;
+            const pending = allUploads.filter(u => !u.viewed).length;
+            const viewed = allUploads.filter(u => u.viewed).length;
+            const customerUploads = allUploads.filter(u => u.type === 'customer_upload').length;
+            const adminShares = allUploads.filter(u => u.type === 'admin_share').length;
+
+            document.getElementById('statsContainer').innerHTML = `
+                <div class="stat-card"><div class="number">${total}</div><div class="label">Total</div></div>
+                <div class="stat-card"><div class="number">${customerUploads}</div><div class="label">Customer Uploads</div></div>
+                <div class="stat-card"><div class="number">${adminShares}</div><div class="label">Admin Shared</div></div>
+                <div class="stat-card"><div class="number">${pending}</div><div class="label">Pending</div></div>
+            `;
+
+            const container = document.getElementById('uploadsList');
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="empty-state">📭 No uploads found</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map((u, index) => {
+                const isAdminShare = u.type === 'admin_share';
+                const typeLabel = isAdminShare ? 'Admin Shared' : 'Customer Upload';
+                const typeClass = isAdminShare ? 'admin' : 'customer';
+
+                const filesHtml = u.files.map((f) => {
+                    const isImage = f.type && f.type.startsWith('image/');
+                    const imageSrc = f.url || f.data || '';
+                    const cleanSrc = imageSrc.replace(/;\s*$/, '').trim();
+                    
+                    if (isImage && cleanSrc) {
+                        return `
+                            <div class="file-preview" onclick="openLightbox('${cleanSrc}')">
+                                <img src="${cleanSrc}" alt="${f.name}" 
+                                     onerror="this.parentElement.innerHTML='<div class=\\'file-icon\\'>🖼️</div><div class=\\'file-name\\'>${f.name}</div><div class=\\'file-size\\'>Image not found</div>'" />
+                                <div class="file-name">${f.name}</div>
+                                <div class="file-size">${(f.size/1024).toFixed(1)} KB</div>
+                                ${f.cloud ? '<div class="cloud-badge">☁️</div>' : ''}
+                                <a href="${cleanSrc}" download="${f.name}" class="download-icon">⬇️</a>
+                            </div>
+                        `;
+                    } else {
+                        const icon = f.name && f.name.endsWith('.pdf') ? '📄' : '📝';
+                        return `
+                            <div class="file-preview" onclick="window.open('${cleanSrc}', '_blank')">
+                                <div class="file-icon">${icon}</div>
+                                <div class="file-name">${f.name || 'File'}</div>
+                                <div class="file-size">${(f.size/1024).toFixed(1)} KB</div>
+                            </div>
+                        `;
+                    }
+                }).join('');
+
+                const messageHtml = u.message ? `
+                    <div class="message-box">💬 ${u.message}</div>
+                ` : '';
+
+                const badgeClass = u.viewed ? 'badge-viewed' : 'badge-pending';
+                const badgeText = u.viewed ? '✅ Viewed' : '⏳ Pending';
+
+                return `
+                    <div class="upload-item">
+                        <div class="meta">
+                            <span class="mobile">📱 ${u.mobile || 'Unknown'}</span>
+                            <span class="type-badge ${typeClass}">${typeLabel}</span>
+                            <span class="time">${u.timestamp ? new Date(u.timestamp).toLocaleString() : 'No date'}</span>
+                            <span class="badge ${badgeClass}">${badgeText}</span>
+                        </div>
+                        ${messageHtml}
+                        <div class="files">${filesHtml}</div>
+                        <div class="action-buttons">
+                            ${!u.viewed ? `<button class="btn btn-success" onclick="markViewed('${u.id}')">✅ Mark as Viewed</button>` : ''}
+                            <button class="btn btn-danger" onclick="deleteUpload('${u.id}')">🗑️ Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function markViewed(id) {
+            const upload = allUploads.find(u => u.id === id);
+            if (upload) {
+                upload.viewed = true;
+                saveToGitHub(allUploads, null);
+                renderAdminView();
+                showToast('✅ Marked as viewed');
+            }
+        }
+
+        function deleteUpload(id) {
+            if (!confirm('Delete this upload?')) return;
+            allUploads = allUploads.filter(u => u.id !== id);
+            saveToGitHub(allUploads, null);
+            renderAdminView();
+            showToast('🗑️ Deleted');
+        }
+
+        function showToast(msg, type = 'success') {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
 
         window.onload = function() {
-            console.log('🌿 Jumbotail Customer Portal loaded!');
+            console.log('🌿 Jumbotail Admin Dashboard loaded!');
             console.log('Jai Jawan, Jai Kisan, Jai Dukaan');
         };
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </body>
 </html>
