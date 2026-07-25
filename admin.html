@@ -9,40 +9,68 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f4f7f9;
+            background: #f5f5f0;
             padding: 20px;
             color: #1a202c;
         }
         .container { max-width: 1200px; margin: 0 auto; }
+        
+        /* Header */
         .dashboard-header {
-            background: white;
+            background: #1a3c2a;
+            color: white;
             padding: 25px 30px;
-            border-radius: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border-radius: 12px;
             margin-bottom: 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 15px;
-            border-left: 6px solid #2b6cb0;
+            border-bottom: 4px solid #d4a843;
         }
         .dashboard-header h1 {
             font-size: 24px;
             font-weight: 700;
-            color: #1a365d;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         .dashboard-header .subtitle {
             font-size: 14px;
-            color: #4a5568;
+            opacity: 0.8;
             font-weight: 400;
         }
+        .dashboard-header .tagline {
+            font-size: 12px;
+            opacity: 0.6;
+            font-style: italic;
+            margin-top: 2px;
+        }
+        .dashboard-header .leaf {
+            font-size: 22px;
+        }
+        .btn-logout {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        .btn-logout:hover { background: rgba(255,255,255,0.25); }
+        
+        /* Cards */
         .card {
             background: white;
-            border-radius: 16px;
+            border-radius: 12px;
             padding: 24px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             margin-bottom: 24px;
+            border: 1px solid #e8edea;
         }
         .card-header {
             display: flex;
@@ -55,8 +83,10 @@
         .card-header h3 {
             font-size: 18px;
             font-weight: 600;
-            color: #2d3748;
+            color: #1a3c2a;
         }
+        
+        /* Buttons */
         .btn {
             padding: 8px 16px;
             border: none;
@@ -69,20 +99,22 @@
             align-items: center;
             gap: 6px;
         }
-        .btn-primary { background: #2b6cb0; color: white; }
-        .btn-primary:hover { background: #1a365d; }
-        .btn-success { background: #48bb78; color: white; }
-        .btn-success:hover { background: #38a169; }
-        .btn-danger { background: #fc8181; color: white; }
-        .btn-danger:hover { background: #f56565; }
+        .btn-primary { background: #1a3c2a; color: white; }
+        .btn-primary:hover { background: #2d5a42; }
+        .btn-success { background: #2d7d46; color: white; }
+        .btn-success:hover { background: #1a5c32; }
+        .btn-danger { background: #c0392b; color: white; }
+        .btn-danger:hover { background: #a93226; }
         .btn-excel { background: #1d6f42; color: white; }
         .btn-excel:hover { background: #155d36; }
-        .btn-download { background: #9f7aea; color: white; }
-        .btn-download:hover { background: #805ad5; }
-        .btn-backup { background: #ed8936; color: white; }
-        .btn-backup:hover { background: #dd6b20; }
-        .btn-outline { background: transparent; border: 1.5px solid #e2e8f0; color: #4a5568; }
-        .btn-outline:hover { background: #f7fafc; }
+        .btn-download { background: #5b6e5a; color: white; }
+        .btn-download:hover { background: #4a5d49; }
+        .btn-backup { background: #d4a843; color: #1a202c; }
+        .btn-backup:hover { background: #c49a3a; }
+        .btn-outline { background: transparent; border: 1.5px solid #d1d5d0; color: #4a5568; }
+        .btn-outline:hover { background: #f5f5f0; }
+        
+        /* Stats */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -90,44 +122,49 @@
             margin-bottom: 24px;
         }
         .stat-card {
-            background: #f7fafc;
+            background: #f5f5f0;
             padding: 18px;
-            border-radius: 12px;
+            border-radius: 10px;
             text-align: center;
-            border: 1px solid #edf2f7;
+            border: 1px solid #e8edea;
         }
         .stat-card .number {
             font-size: 28px;
             font-weight: 700;
-            color: #1a365d;
+            color: #1a3c2a;
         }
         .stat-card .label {
             font-size: 13px;
-            color: #718096;
+            color: #5b6e5a;
             margin-top: 2px;
         }
+        
+        /* Filter */
         .filter-box input {
             width: 100%;
             max-width: 300px;
             padding: 10px 16px;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 10px;
+            border: 1.5px solid #d1d5d0;
+            border-radius: 8px;
             font-size: 14px;
+            background: #fafaf8;
         }
         .filter-box input:focus {
             outline: none;
-            border-color: #2b6cb0;
-            box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.1);
+            border-color: #1a3c2a;
+            box-shadow: 0 0 0 3px rgba(26, 60, 42, 0.1);
         }
+        
+        /* Upload Items */
         .upload-item {
-            border: 1px solid #edf2f7;
-            border-radius: 12px;
+            border: 1px solid #e8edea;
+            border-radius: 10px;
             padding: 16px;
             margin-bottom: 14px;
-            background: #fafbfc;
+            background: #fafaf8;
             transition: all 0.15s;
         }
-        .upload-item:hover { background: #f7fafc; }
+        .upload-item:hover { background: #f5f5f0; }
         .upload-item .meta {
             display: flex;
             justify-content: space-between;
@@ -138,7 +175,7 @@
         .upload-item .mobile {
             font-weight: 600;
             font-size: 16px;
-            color: #1a202c;
+            color: #1a3c2a;
         }
         .upload-item .time {
             color: #718096;
@@ -153,8 +190,8 @@
         .upload-item .file-preview {
             background: white;
             padding: 8px;
-            border-radius: 10px;
-            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            border: 1px solid #e8edea;
             text-align: center;
             width: 120px;
             position: relative;
@@ -168,7 +205,7 @@
             width: 100px;
             height: 100px;
             object-fit: cover;
-            border-radius: 6px;
+            border-radius: 4px;
         }
         .upload-item .file-preview .file-icon {
             font-size: 40px;
@@ -190,7 +227,7 @@
             position: absolute;
             top: 4px;
             right: 4px;
-            background: #48bb78;
+            background: #2d7d46;
             color: white;
             font-size: 8px;
             padding: 2px 6px;
@@ -200,7 +237,7 @@
             position: absolute;
             top: 4px;
             left: 4px;
-            background: #fc8181;
+            background: #c0392b;
             color: white;
             font-size: 8px;
             padding: 2px 6px;
@@ -210,7 +247,7 @@
             position: absolute;
             bottom: 4px;
             right: 4px;
-            background: #2b6cb0;
+            background: #1a3c2a;
             color: white;
             font-size: 10px;
             padding: 2px 6px;
@@ -220,6 +257,8 @@
             cursor: pointer;
         }
         .upload-item .file-preview:hover .download-icon { opacity: 1; }
+        
+        /* Badges */
         .badge {
             padding: 4px 12px;
             border-radius: 20px;
@@ -229,6 +268,8 @@
         .badge-pending { background: #fefcbf; color: #975a16; }
         .badge-viewed { background: #c6f6d5; color: #22543d; }
         .badge-broken { background: #fc8181; color: white; }
+        
+        /* Action Buttons */
         .action-buttons {
             display: flex;
             gap: 8px;
@@ -241,26 +282,37 @@
             padding: 40px;
             color: #718096;
         }
+        
+        /* Admin Actions */
+        .admin-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        /* Toast */
         .toast {
             position: fixed;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
             padding: 14px 28px;
-            background: #1a202c;
+            background: #1a3c2a;
             color: white;
-            border-radius: 12px;
+            border-radius: 10px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
             z-index: 9999;
             font-weight: 500;
             animation: slideUp 0.3s ease;
         }
-        .toast.error { background: #e53e3e; }
-        .toast.warning { background: #dd6b20; }
+        .toast.error { background: #c0392b; }
+        .toast.warning { background: #d4a843; }
         @keyframes slideUp {
             from { opacity: 0; transform: translate(-50%, 20px); }
             to { opacity: 1; transform: translate(-50%, 0); }
         }
+        
+        /* Lightbox */
         .lightbox {
             display: none;
             position: fixed;
@@ -286,20 +338,24 @@
             font-weight: 300;
             cursor: pointer;
         }
+        
+        /* Progress */
         .download-progress {
             margin: 12px 0;
             padding: 12px 16px;
-            background: #edf2f7;
-            border-radius: 10px;
+            background: #e8edea;
+            border-radius: 8px;
             display: none;
         }
         .download-progress .bar {
             height: 4px;
-            background: #2b6cb0;
+            background: #1a3c2a;
             border-radius: 4px;
             width: 0%;
             transition: width 0.3s;
         }
+        
+        /* Modal */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -313,14 +369,46 @@
         .modal {
             background: white;
             padding: 30px;
-            border-radius: 16px;
+            border-radius: 12px;
             max-width: 450px;
             width: 90%;
             text-align: center;
         }
-        .modal h3 { margin-bottom: 12px; color: #1a365d; }
+        .modal h3 { margin-bottom: 12px; color: #1a3c2a; }
         .modal p { color: #4a5568; font-size: 14px; }
         .modal .btn { width: 100%; margin-top: 16px; }
+        
+        /* Login */
+        .login-card {
+            max-width: 400px;
+            margin: 80px auto;
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            border: 1px solid #e8edea;
+        }
+        .login-card h2 {
+            color: #1a3c2a;
+            margin-bottom: 20px;
+        }
+        .login-card input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #d1d5d0;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            background: #fafaf8;
+        }
+        .login-card input:focus {
+            outline: none;
+            border-color: #1a3c2a;
+            box-shadow: 0 0 0 3px rgba(26, 60, 42, 0.1);
+        }
+        .login-card .btn { width: 100%; padding: 12px; }
+        
+        /* Responsive */
         @media (max-width: 640px) {
             .dashboard-header { flex-direction: column; align-items: stretch; text-align: center; }
             .card-header { flex-direction: column; align-items: stretch; }
@@ -348,11 +436,10 @@
 
         <!-- Login Screen -->
         <div id="loginScreen">
-            <div class="card" style="max-width: 400px; margin: 80px auto; text-align: center;">
-                <h2 style="margin-bottom: 20px; color: #1a365d;">🔐 Admin Login</h2>
-                <input type="password" id="adminPassword" placeholder="Enter admin password" 
-                       style="width:100%; padding:12px 16px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:16px; margin-bottom:15px;" />
-                <button class="btn btn-primary" onclick="adminLogin()" style="width:100%; padding:12px;">Login</button>
+            <div class="login-card">
+                <h2>🌿 Admin Login</h2>
+                <input type="password" id="adminPassword" placeholder="Enter admin password" />
+                <button class="btn btn-primary" onclick="adminLogin()">Login</button>
             </div>
         </div>
 
@@ -360,16 +447,17 @@
         <div id="dashboardScreen" style="display:none;">
             <div class="dashboard-header">
                 <div>
-                    <h1>📋 Admin Dashboard</h1>
+                    <h1><span class="leaf">🌿</span> Admin Dashboard</h1>
                     <div class="subtitle">Manage all customer uploads</div>
+                    <div class="tagline">Jai Jawan, Jai Kisan, Jai Dukaan</div>
                 </div>
-                <button class="btn btn-danger" onclick="adminLogout()">🚪 Logout</button>
+                <button class="btn-logout" onclick="adminLogout()">🚪 Logout</button>
             </div>
 
             <div class="card">
                 <div class="card-header">
                     <h3>All Uploads</h3>
-                    <div class="admin-actions" style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <div class="admin-actions">
                         <button class="btn btn-primary" onclick="loadUploads()">🔄 Refresh</button>
                         <button class="btn btn-backup" onclick="backupAllData()">📦 Backup</button>
                         <button class="btn btn-excel" onclick="downloadExcel()">📊 Excel</button>
@@ -402,12 +490,8 @@
         // ============================================================
         //  🔐 CONFIGURATION
         // ============================================================
-        const ADMIN_PASSWORD = 'admin123';  // ← CHANGE THIS PASSWORD!
+        const ADMIN_PASSWORD = 'admin123';
         const GITHUB_TOKEN = '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';
-        
-        // ============================================================
-        //  GITHUB SETTINGS
-        // ============================================================
         const GITHUB_OWNER = 'shifajt';
         const GITHUB_REPO = 'customer-upload-portal';
         const GITHUB_BRANCH = 'main';
@@ -495,20 +579,17 @@
             }
             
             try {
-                // Create a comprehensive backup object
                 const backup = {
                     exportDate: new Date().toISOString(),
                     totalUploads: allUploads.length,
                     uploads: allUploads.map(u => ({
                         ...u,
-                        // Clean up file data for backup
                         files: u.files.map(f => ({
                             name: f.name,
                             type: f.type,
                             size: f.size,
                             url: f.url || null,
                             cloud: f.cloud || false,
-                            // If it's a local file, include the data
                             ...(f.data && !f.url ? { data: f.data.substring(0, 100) + '...' } : {})
                         }))
                     }))
@@ -540,7 +621,7 @@
         }
 
         // ============================================================
-        //  📸 DOWNLOAD ALL IMAGES (ZIP)
+        //  📸 DOWNLOAD ALL IMAGES
         // ============================================================
         async function downloadAllImages() {
             const imageUrls = [];
@@ -633,9 +714,8 @@
                     <head><meta charset="UTF-8">
                     <style>
                         table { border-collapse: collapse; width: 100%; }
-                        th { background-color: #2b6cb0; color: white; padding: 10px; border: 1px solid #ddd; }
+                        th { background-color: #1a3c2a; color: white; padding: 10px; border: 1px solid #ddd; }
                         td { padding: 8px; border: 1px solid #ddd; }
-                        .url-link { color: #1a73e8; text-decoration: underline; }
                     </style>
                     </head>
                     <body><table>
@@ -710,22 +790,19 @@
                     <html>
                     <head><title>Upload Report</title>
                     <style>
-                        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
-                        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
-                        h1 { color: #1a365d; }
+                        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f0; }
+                        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; }
+                        h1 { color: #1a3c2a; }
                         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                        th { background: #2b6cb0; color: white; padding: 10px; text-align: left; }
+                        th { background: #1a3c2a; color: white; padding: 10px; text-align: left; }
                         td { padding: 10px; border-bottom: 1px solid #ddd; }
-                        .url { color: #1a73e8; word-break: break-all; }
                         .pending { background: #fefcbf; padding: 2px 8px; border-radius: 4px; }
                         .viewed { background: #c6f6d5; padding: 2px 8px; border-radius: 4px; }
-                        img { max-width: 80px; max-height: 80px; object-fit: cover; border-radius: 4px; }
-                        tr:hover { background: #f7fafc; }
                     </style>
                     </head>
                     <body>
                     <div class="container">
-                        <h1>📊 Upload Report - ${new Date().toLocaleDateString()}</h1>
+                        <h1>🌿 Upload Report - ${new Date().toLocaleDateString()}</h1>
                         <p>Total Uploads: ${allUploads.length}</p>
                         <table>
                             <tr>
@@ -747,7 +824,7 @@
                         let url = file.url || file.data || '';
                         if (url) {
                             url = url.replace(/;\s*$/, '').trim();
-                            fileUrls.push(`<a href="${url}" target="_blank" class="url">${url.substring(0, 50)}${url.length > 50 ? '...' : ''}</a>`);
+                            fileUrls.push(`<a href="${url}" target="_blank">${url.substring(0, 50)}${url.length > 50 ? '...' : ''}</a>`);
                         } else {
                             fileUrls.push('Local file');
                         }
@@ -823,7 +900,6 @@
                     const cleanSrc = imageSrc.replace(/;\s*$/, '').trim();
                     
                     if (isImage && cleanSrc) {
-                        // Check if image is broken (for imgbb images)
                         const isBroken = f.cloud === false || (!f.url && f.data);
                         return `
                             <div class="file-preview" onclick="openLightbox('${cleanSrc}')">
@@ -901,11 +977,10 @@
         }
 
         window.onload = function() {
-            console.log('🔐 Admin Dashboard loaded!');
-            console.log('☁️ Cloudinary configured for PERMANENT storage!');
+            console.log('🌿 Admin Dashboard loaded!');
+            console.log('Jai Jawan, Jai Kisan, Jai Dukaan');
         };
     </script>
-    <!-- JSZip for image downloads -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </body>
 </html>
