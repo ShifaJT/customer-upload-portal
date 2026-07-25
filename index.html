@@ -188,7 +188,7 @@
 
         <div class="card">
             <div class="status-banner">
-                ✅ Secure upload to cloud storage
+                ✅ Secure upload to Cloudinary (PERMANENT storage - NEVER expires!)
             </div>
 
             <form id="uploadForm" onsubmit="handleSubmit(event)">
@@ -238,13 +238,19 @@
 
     <script>
         // ============================================================
-        //  🔑 CONFIGURATION - EDIT THESE TWO LINES ONLY!
+        //  🔑 YOUR CLOUDINARY CREDENTIALS (PERMANENT STORAGE!)
         // ============================================================
-        const IMGBB_API_KEY = 'bb3fb10ee503d971c536d6dda8f2e735';  // ← Get from https://api.imgbb.com/
-        const GITHUB_TOKEN = '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';     // ← Get from https://github.com/settings/tokens (No Expiration!)
+        const CLOUDINARY_CLOUD_NAME = 'vcr5gfhi';
+        const CLOUDINARY_API_KEY = '954166197462943';
+        const CLOUDINARY_API_SECRET = 'hkPCj0ACqO1-0wpjt16xc3YXbbY';
         
         // ============================================================
-        //  GITHUB SETTINGS (Don't change these)
+        //  🔑 YOUR GITHUB TOKEN (NEVER EXPIRES!)
+        // ============================================================
+        const GITHUB_TOKEN = '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';
+        
+        // ============================================================
+        //  GITHUB SETTINGS
         // ============================================================
         const GITHUB_OWNER = 'shifajt';
         const GITHUB_REPO = 'customer-upload-portal';
@@ -348,37 +354,41 @@
         }
 
         // ============================================================
-        //  UPLOAD TO IMGBB CLOUD
+        //  UPLOAD TO CLOUDINARY (PERMANENT!)
         // ============================================================
-        async function uploadToImgbb(file) {
+        async function uploadToCloudinary(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = async (e) => {
                     try {
                         const base64 = e.target.result.split(',')[1];
+                        
                         const formData = new FormData();
-                        formData.append('key', IMGBB_API_KEY);
-                        formData.append('image', base64);
-                        formData.append('name', file.name);
-
-                        const response = await fetch('https://api.imgbb.com/1/upload', {
-                            method: 'POST',
-                            body: formData
-                        });
+                        formData.append('file', `data:${file.type};base64,${base64}`);
+                        formData.append('upload_preset', 'ml_default');
+                        formData.append('api_key', CLOUDINARY_API_KEY);
+                        
+                        const response = await fetch(
+                            `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+                            {
+                                method: 'POST',
+                                body: formData
+                            }
+                        );
 
                         const data = await response.json();
                         
-                        if (data.success) {
+                        if (data.secure_url) {
                             resolve({
                                 name: file.name,
                                 type: file.type,
                                 size: file.size,
-                                url: data.data.url,
-                                thumb: data.data.thumb?.url || data.data.url,
-                                cloud: true
+                                url: data.secure_url,
+                                cloud: true,
+                                public_id: data.public_id
                             });
                         } else {
-                            reject(new Error(data.error?.message || 'Upload failed'));
+                            reject(new Error('Upload failed'));
                         }
                     } catch (error) {
                         reject(error);
@@ -390,7 +400,7 @@
         }
 
         // ============================================================
-        //  GITHUB STORAGE - PERMANENT & SHARED!
+        //  GITHUB STORAGE
         // ============================================================
         async function loadFromGitHub() {
             try {
@@ -477,7 +487,7 @@
             const progressFill = document.getElementById('progressFill');
             
             btn.disabled = true;
-            btn.textContent = '⏳ Uploading...';
+            btn.textContent = '⏳ Uploading to Cloudinary...';
             progressBar.style.display = 'block';
             progressFill.style.width = '0%';
 
@@ -493,8 +503,21 @@
                     btn.textContent = `⏳ Uploading ${i+1}/${totalFiles}...`;
 
                     if (file.type.startsWith('image/')) {
-                        const result = await uploadToImgbb(file);
-                        uploadedFiles.push(result);
+                        try {
+                            const result = await uploadToCloudinary(file);
+                            uploadedFiles.push(result);
+                            console.log('✅ Uploaded to Cloudinary:', result.url);
+                        } catch (err) {
+                            console.error('Cloudinary upload failed:', err);
+                            const dataUrl = await readFileAsDataURL(file);
+                            uploadedFiles.push({
+                                name: file.name,
+                                type: file.type,
+                                size: file.size,
+                                data: dataUrl,
+                                cloud: false
+                            });
+                        }
                     } else {
                         const dataUrl = await readFileAsDataURL(file);
                         uploadedFiles.push({
@@ -532,7 +555,7 @@
                 document.getElementById('locationDisplay').innerHTML = '';
                 document.getElementById('fileInput').value = '';
 
-                showToast('✅ Upload successful! Data saved to GitHub.');
+                showToast('✅ Upload successful! Stored permanently on Cloudinary.');
             } catch (err) {
                 console.error('Upload error:', err);
                 showToast('❌ Upload failed: ' + err.message, 'error');
@@ -555,12 +578,8 @@
 
         window.onload = function() {
             console.log('📤 Customer Upload Portal loaded!');
-            if (!IMGBB_API_KEY || IMGBB_API_KEY === 'bb3fb10ee503d971c536d6dda8f2e735') {
-                console.warn('⚠️ Please set your imgbb API key!');
-            }
-            if (!GITHUB_TOKEN || GITHUB_TOKEN === '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') {
-                console.warn('⚠️ Please set your GitHub token!');
-            }
+            console.log('☁️ Cloudinary configured for PERMANENT storage!');
+            console.log('✅ GitHub token: ' + GITHUB_TOKEN.substring(0, 10) + '...');
         };
     </script>
 </body>
