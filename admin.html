@@ -49,6 +49,8 @@
         .btn-primary:hover { background: #5a67d8; }
         .btn-excel { background: #1d6f42; color: white; }
         .btn-excel:hover { background: #155d36; }
+        .btn-download { background: #9f7aea; color: white; }
+        .btn-download:hover { background: #805ad5; }
         .admin-login {
             max-width: 400px;
             margin: 40px auto;
@@ -140,6 +142,21 @@
             padding: 2px 6px;
             border-radius: 10px;
         }
+        .upload-item .file-preview .download-icon {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: #667eea;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .upload-item .file-preview:hover .download-icon {
+            opacity: 1;
+        }
         .badge {
             padding: 4px 12px;
             border-radius: 20px;
@@ -220,6 +237,7 @@
             animation: slideIn 0.3s;
         }
         .toast.error { background: #fc8181; }
+        .toast.warning { background: #ed8936; }
         @keyframes slideIn {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
@@ -274,6 +292,25 @@
             font-weight: 600;
         }
         .refresh-btn:hover { background: #5a67d8; }
+        .download-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .download-progress {
+            margin: 10px 0;
+            padding: 10px;
+            background: #edf2f7;
+            border-radius: 8px;
+            display: none;
+        }
+        .download-progress .bar {
+            height: 6px;
+            background: #667eea;
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.3s;
+        }
         @media (max-width: 600px) {
             .header h1 { font-size: 22px; }
             .upload-item .file-preview {
@@ -317,9 +354,21 @@
                     <h3>All Uploads</h3>
                     <div class="admin-actions">
                         <button class="refresh-btn" onclick="loadUploads()">🔄 Refresh</button>
-                        <button class="btn btn-excel" onclick="downloadExcel()">📊 Download Excel</button>
+                        <div class="download-options">
+                            <button class="btn btn-excel" onclick="downloadExcel()">📊 Excel</button>
+                            <button class="btn btn-download" onclick="downloadAllImages()">📸 Download Images</button>
+                            <button class="btn btn-primary" onclick="downloadHTML()">📄 HTML</button>
+                        </div>
                         <button class="btn btn-danger" onclick="adminLogout()" style="width:auto; padding:8px 20px;">🚪 Logout</button>
                     </div>
+                </div>
+
+                <div class="download-progress" id="downloadProgress">
+                    <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;">
+                        <span>Downloading images...</span>
+                        <span id="progressText">0%</span>
+                    </div>
+                    <div class="bar" id="progressBar"></div>
                 </div>
 
                 <div class="sync-status">
@@ -434,7 +483,100 @@
         }
 
         // ============================================================
-        //  📊 DOWNLOAD EXCEL WITH IMAGE URLS
+        //  📸 DOWNLOAD ALL IMAGES AS ZIP
+        // ============================================================
+        async function downloadAllImages() {
+            // Get all image URLs
+            const imageUrls = [];
+            allUploads.forEach(upload => {
+                upload.files.forEach(file => {
+                    if (file.url && file.type && file.type.startsWith('image/')) {
+                        // Clean URL - remove any trailing semicolons
+                        let cleanUrl = file.url.replace(/;\s*$/, '').trim();
+                        imageUrls.push({
+                            url: cleanUrl,
+                            name: file.name || 'image.jpg'
+                        });
+                    }
+                });
+            });
+
+            if (imageUrls.length === 0) {
+                showToast('No images found to download', 'warning');
+                return;
+            }
+
+            // Show progress
+            const progressDiv = document.getElementById('downloadProgress');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            progressDiv.style.display = 'block';
+            progressBar.style.width = '0%';
+            progressText.textContent = '0%';
+
+            try {
+                // Fetch all images
+                const images = [];
+                let downloaded = 0;
+                const total = imageUrls.length;
+
+                for (let i = 0; i < imageUrls.length; i++) {
+                    const item = imageUrls[i];
+                    try {
+                        const response = await fetch(item.url);
+                        const blob = await response.blob();
+                        const reader = new FileReader();
+                        
+                        const dataUrl = await new Promise((resolve) => {
+                            reader.onload = (e) => resolve(e.target.result);
+                            reader.readAsDataURL(blob);
+                        });
+                        
+                        images.push({
+                            name: item.name,
+                            dataUrl: dataUrl
+                        });
+                    } catch (err) {
+                        console.error('Failed to download:', item.url, err);
+                    }
+                    
+                    downloaded++;
+                    const percent = Math.round((downloaded / total) * 100);
+                    progressBar.style.width = percent + '%';
+                    progressText.textContent = percent + '%';
+                }
+
+                // Create ZIP file
+                const zip = new JSZip();
+                images.forEach(img => {
+                    const base64Data = img.dataUrl.split(',')[1];
+                    zip.file(img.name, base64Data, { base64: true });
+                });
+
+                const zipBlob = await zip.generateAsync({ type: 'blob' });
+                
+                // Download ZIP
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(zipBlob);
+                link.download = `images_${new Date().toISOString().slice(0,10)}.zip`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+
+                showToast(`📸 Downloaded ${images.length} images as ZIP!`);
+            } catch (error) {
+                console.error('Download error:', error);
+                showToast('Error downloading images: ' + error.message, 'error');
+            } finally {
+                progressDiv.style.display = 'none';
+                progressBar.style.width = '0%';
+                progressText.textContent = '0%';
+            }
+        }
+
+        // ============================================================
+        //  📊 DOWNLOAD EXCEL
         // ============================================================
         function downloadExcel() {
             if (allUploads.length === 0) {
@@ -443,10 +585,34 @@
             }
 
             try {
-                let csvRows = [];
-                csvRows.push('Mobile Number,Date & Time,Latitude,Longitude,File Names,Image URLs,Status');
-                
-                allUploads.forEach((upload) => {
+                let html = `
+                    <html xmlns:o="urn:schemas-microsoft-com:office:office" 
+                          xmlns:x="urn:schemas-microsoft-com:office:excel" 
+                          xmlns="http://www.w3.org/TR/REC-html40">
+                    <head>
+                        <meta charset="UTF-8">
+                        <style>
+                            table { border-collapse: collapse; width: 100%; }
+                            th { background-color: #667eea; color: white; padding: 10px; border: 1px solid #ddd; }
+                            td { padding: 8px; border: 1px solid #ddd; }
+                            .url-link { color: #1a73e8; text-decoration: underline; }
+                        </style>
+                    </head>
+                    <body>
+                    <table>
+                        <tr>
+                            <th>#</th>
+                            <th>Mobile Number</th>
+                            <th>Date & Time</th>
+                            <th>Latitude</th>
+                            <th>Longitude</th>
+                            <th>File Names</th>
+                            <th>Image URLs</th>
+                            <th>Status</th>
+                        </tr>
+                `;
+
+                allUploads.forEach((upload, index) => {
                     const mobile = upload.mobile || '';
                     const date = upload.timestamp ? new Date(upload.timestamp).toLocaleString() : '';
                     
@@ -463,9 +629,10 @@
                     upload.files.forEach((file) => {
                         fileNames.push(file.name || 'Unnamed');
                         if (file.url) {
-                            fileUrls.push(file.url);
+                            let cleanUrl = file.url.replace(/;\s*$/, '').trim();
+                            fileUrls.push(cleanUrl);
                         } else if (file.data) {
-                            fileUrls.push('[Local file - view in admin]');
+                            fileUrls.push('Local file (view in admin)');
                         } else {
                             fileUrls.push('No URL');
                         }
@@ -476,24 +643,152 @@
                     const fileNameStr = fileNames.join('; ');
                     const fileUrlStr = fileUrls.join('; ');
                     
-                    csvRows.push(`"${mobile}","${date}","${lat}","${lng}","${fileNameStr}","${fileUrlStr}","${status}"`);
+                    html += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${mobile}</td>
+                            <td>${date}</td>
+                            <td>${lat}</td>
+                            <td>${lng}</td>
+                            <td>${fileNameStr}</td>
+                            <td><a href="${fileUrlStr}" target="_blank">${fileUrlStr}</a></td>
+                            <td>${status}</td>
+                        </tr>
+                    `;
                 });
-                
-                const csvContent = csvRows.join('\n');
-                const blob = new Blob(['\uFEFF' + csvContent], { 
-                    type: 'text/csv;charset=utf-8;' 
+
+                html += `
+                    </table>
+                    </body>
+                    </html>
+                `;
+
+                const blob = new Blob([html], { 
+                    type: 'application/vnd.ms-excel;charset=utf-8' 
                 });
                 
                 const link = document.createElement('a');
                 const url = URL.createObjectURL(blob);
                 link.href = url;
-                link.download = `uploads_${new Date().toISOString().slice(0,10)}.csv`;
+                link.download = `uploads_${new Date().toISOString().slice(0,10)}.xls`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
                 URL.revokeObjectURL(url);
                 
-                showToast(`📊 Downloaded ${allUploads.length} uploads as Excel!`);
+                showToast(`✅ Downloaded ${allUploads.length} uploads as Excel!`);
+            } catch (error) {
+                console.error('Download error:', error);
+                showToast('Error downloading: ' + error.message, 'error');
+            }
+        }
+
+        // ============================================================
+        //  📄 DOWNLOAD HTML REPORT
+        // ============================================================
+        function downloadHTML() {
+            if (allUploads.length === 0) {
+                showToast('No uploads to download', 'error');
+                return;
+            }
+
+            try {
+                let html = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Upload Report</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+                            .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+                            h1 { color: #667eea; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                            th { background: #667eea; color: white; padding: 10px; text-align: left; }
+                            td { padding: 10px; border-bottom: 1px solid #ddd; }
+                            .url { color: #1a73e8; word-break: break-all; }
+                            .pending { background: #fefcbf; padding: 2px 8px; border-radius: 4px; }
+                            .viewed { background: #c6f6d5; padding: 2px 8px; border-radius: 4px; }
+                            img { max-width: 80px; max-height: 80px; object-fit: cover; border-radius: 4px; }
+                            tr:hover { background: #f7fafc; }
+                        </style>
+                    </head>
+                    <body>
+                    <div class="container">
+                        <h1>📊 Upload Report - ${new Date().toLocaleDateString()}</h1>
+                        <p>Total Uploads: ${allUploads.length}</p>
+                        <table>
+                            <tr>
+                                <th>#</th>
+                                <th>Mobile</th>
+                                <th>Date</th>
+                                <th>Location</th>
+                                <th>Files</th>
+                                <th>Image URLs</th>
+                                <th>Status</th>
+                            </tr>
+                `;
+
+                allUploads.forEach((upload, index) => {
+                    const mobile = upload.mobile || '';
+                    const date = upload.timestamp ? new Date(upload.timestamp).toLocaleString() : '';
+                    
+                    let locationText = 'Not shared';
+                    if (upload.location) {
+                        locationText = `${upload.location.lat || ''}, ${upload.location.lng || ''}`;
+                    }
+                    
+                    let fileNames = [];
+                    let fileUrls = [];
+                    
+                    upload.files.forEach((file) => {
+                        fileNames.push(file.name || 'Unnamed');
+                        let url = file.url || file.data || '';
+                        if (url) {
+                            url = url.replace(/;\s*$/, '').trim();
+                            fileUrls.push(`<a href="${url}" target="_blank" class="url">${url.substring(0, 50)}${url.length > 50 ? '...' : ''}</a>`);
+                        } else {
+                            fileUrls.push('Local file');
+                        }
+                    });
+                    
+                    const status = upload.viewed ? 'Viewed' : 'Pending';
+                    const statusClass = upload.viewed ? 'viewed' : 'pending';
+                    
+                    html += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td><strong>${mobile}</strong></td>
+                            <td>${date}</td>
+                            <td>${locationText}</td>
+                            <td>${fileNames.join('<br>')}</td>
+                            <td>${fileUrls.join('<br>')}</td>
+                            <td><span class="${statusClass}">${status}</span></td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                        </table>
+                        <p style="margin-top: 20px; color: #718096; font-size: 12px;">Report generated on ${new Date().toLocaleString()}</p>
+                    </div>
+                    </body>
+                    </html>
+                `;
+
+                const blob = new Blob([html], { 
+                    type: 'text/html;charset=utf-8' 
+                });
+                
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.href = url;
+                link.download = `upload_report_${new Date().toISOString().slice(0,10)}.html`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                showToast(`📄 Downloaded HTML report with ${allUploads.length} uploads!`);
             } catch (error) {
                 console.error('Download error:', error);
                 showToast('Error downloading: ' + error.message, 'error');
@@ -531,21 +826,23 @@
                 const filesHtml = u.files.map((f) => {
                     const isImage = f.type && f.type.startsWith('image/');
                     const imageSrc = f.url || f.data || '';
+                    const cleanSrc = imageSrc.replace(/;\s*$/, '').trim();
                     
-                    if (isImage && imageSrc) {
+                    if (isImage && cleanSrc) {
                         return `
-                            <div class="file-preview" onclick="openLightbox('${imageSrc}')">
-                                <img src="${imageSrc}" alt="${f.name}" 
+                            <div class="file-preview" onclick="openLightbox('${cleanSrc}')">
+                                <img src="${cleanSrc}" alt="${f.name}" 
                                      onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23f0f2f5%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2230%22%3E🖼️%3C/text%3E%3C/svg%3E'" />
                                 <div class="file-name">${f.name}</div>
                                 <div class="file-size">${(f.size/1024).toFixed(1)} KB</div>
                                 ${f.cloud ? '<div class="cloud-badge">☁️</div>' : ''}
+                                <a href="${cleanSrc}" download="${f.name}" class="download-icon">⬇️</a>
                             </div>
                         `;
                     } else {
                         const icon = f.name && f.name.endsWith('.pdf') ? '📄' : '📝';
                         return `
-                            <div class="file-preview" onclick="window.open('${imageSrc}', '_blank')">
+                            <div class="file-preview" onclick="window.open('${cleanSrc}', '_blank')">
                                 <div class="file-icon">${icon}</div>
                                 <div class="file-name">${f.name || 'File'}</div>
                                 <div class="file-size">${(f.size/1024).toFixed(1)} KB</div>
@@ -607,8 +904,10 @@
         window.onload = function() {
             console.log('🔐 Admin Dashboard loaded!');
             console.log('☁️ Cloudinary configured for PERMANENT storage!');
-            console.log('✅ GitHub token configured!');
+            console.log('📸 Image download feature ready!');
         };
     </script>
+    <!-- JSZip library for ZIP creation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </body>
 </html>
