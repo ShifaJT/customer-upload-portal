@@ -455,14 +455,14 @@
 
         <!-- TAB 1: UPLOAD -->
         <div id="uploadTab" class="upload-card">
-            <h3>📎 Upload Files <span class="badge">NEW</span></h3>
+            <h3>📎 Upload <span class="badge">NEW</span></h3>
             <form id="uploadForm" onsubmit="handleSubmit(event)">
                 <div class="form-group">
                     <label for="mobile">📱 Your Mobile Number *</label>
                     <input type="tel" id="mobile" placeholder="Enter 10-digit mobile number" pattern="[0-9]{10}" required />
                 </div>
                 <div class="form-group">
-                    <label>📎 Select Files *</label>
+                    <label>📎 Select Files <span style="font-weight:400; color:#718096; font-size:13px;">(Optional)</span></label>
                     <div class="file-drop" onclick="document.getElementById('fileInput').click()">
                         <span class="icon">📁</span>
                         <div class="text">Click to select files</div>
@@ -473,13 +473,16 @@
                     <div id="fileCount" style="font-size: 13px; color: #718096; margin-top: 6px;"></div>
                 </div>
                 <div class="form-group">
-                    <label>📍 Location (Optional)</label>
+                    <label>📍 Location <span style="font-weight:400; color:#718096; font-size:13px;">(Optional)</span></label>
                     <button type="button" class="location-btn" onclick="getLocation()">📍 Share My Location</button>
                     <div id="locationDisplay" style="margin-top: 8px; font-size: 14px; color: #4a5568;"></div>
                 </div>
                 <div class="progress-bar" id="progressBar" style="display:none;"><div class="fill" id="progressFill"></div></div>
                 <button type="submit" class="btn btn-primary" id="submitBtn">🚀 Submit</button>
             </form>
+            <p style="font-size:13px; color:#a0aec0; margin-top:12px; text-align:center;">
+                You can submit location without any files
+            </p>
         </div>
 
         <!-- TAB 2: VIEW SHARED FILES -->
@@ -716,7 +719,7 @@
         }
 
         // ============================================================
-        //  SUBMIT HANDLER
+        //  SUBMIT HANDLER - FIXED: Allows location-only submission
         // ============================================================
         async function handleSubmit(e) {
             e.preventDefault();
@@ -725,8 +728,10 @@
                 showToast('Please enter a valid 10-digit mobile number', 'error');
                 return;
             }
-            if (selectedFiles.length === 0) {
-                showToast('Please select at least one file', 'error');
+            
+            // Check if user has shared location OR selected files
+            if (selectedFiles.length === 0 && !userLocation) {
+                showToast('Please either select files or share your location', 'warning');
                 return;
             }
 
@@ -739,32 +744,37 @@
             progressFill.style.width = '0%';
 
             try {
-                const totalFiles = selectedFiles.length;
                 const uploadedFiles = [];
-                for (let i = 0; i < selectedFiles.length; i++) {
-                    const file = selectedFiles[i];
-                    const percent = ((i) / totalFiles) * 100;
-                    progressFill.style.width = percent + '%';
-                    btn.textContent = `⏳ Uploading ${i+1}/${totalFiles}...`;
+                
+                // Only process files if there are any
+                if (selectedFiles.length > 0) {
+                    const totalFiles = selectedFiles.length;
+                    for (let i = 0; i < selectedFiles.length; i++) {
+                        const file = selectedFiles[i];
+                        const percent = ((i) / totalFiles) * 100;
+                        progressFill.style.width = percent + '%';
+                        btn.textContent = `⏳ Uploading ${i+1}/${totalFiles}...`;
 
-                    if (file.type.startsWith('image/')) {
-                        try {
-                            const result = await uploadToCloudinary(file);
-                            uploadedFiles.push(result);
-                        } catch (err) {
-                            console.error('Cloudinary upload failed:', err);
+                        if (file.type.startsWith('image/')) {
+                            try {
+                                const result = await uploadToCloudinary(file);
+                                uploadedFiles.push(result);
+                            } catch (err) {
+                                console.error('Cloudinary upload failed:', err);
+                                const dataUrl = await readFileAsDataURL(file);
+                                uploadedFiles.push({ name: file.name, type: file.type, size: file.size, data: dataUrl, cloud: false });
+                            }
+                        } else {
                             const dataUrl = await readFileAsDataURL(file);
                             uploadedFiles.push({ name: file.name, type: file.type, size: file.size, data: dataUrl, cloud: false });
                         }
-                    } else {
-                        const dataUrl = await readFileAsDataURL(file);
-                        uploadedFiles.push({ name: file.name, type: file.type, size: file.size, data: dataUrl, cloud: false });
                     }
                 }
 
                 progressFill.style.width = '100%';
                 btn.textContent = '💾 Saving...';
                 const { data: existingData, sha } = await loadFromGitHub();
+                
                 const upload = {
                     id: Date.now().toString(),
                     type: 'customer_upload',
@@ -773,7 +783,9 @@
                     location: userLocation,
                     timestamp: new Date().toISOString(),
                     viewed: false,
-                    direction: 'customer_to_admin'
+                    direction: 'customer_to_admin',
+                    has_location: !!userLocation,
+                    has_files: uploadedFiles.length > 0
                 };
                 existingData.unshift(upload);
                 await saveToGitHub(existingData, sha);
@@ -808,7 +820,7 @@
         }
 
         // ============================================================
-        //  📥 DOWNLOAD FILE - COMPLETE FIX!
+        //  📥 DOWNLOAD FILE
         // ============================================================
         function downloadFile(url, filename) {
             const progressDiv = document.getElementById('downloadProgress');
@@ -820,45 +832,29 @@
             progressText.textContent = '0%';
 
             try {
-                // For data URLs (local images), create download directly
                 if (url.startsWith('data:')) {
                     progressBar.style.width = '50%';
                     progressText.textContent = '50%';
-                    
-                    // Create download link directly from data URL
                     const link = document.createElement('a');
                     link.href = url;
                     link.download = filename;
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
-                    
                     progressBar.style.width = '100%';
                     progressText.textContent = '100%';
-                    
-                    setTimeout(() => {
-                        progressDiv.style.display = 'none';
-                    }, 1500);
-                    
+                    setTimeout(() => { progressDiv.style.display = 'none'; }, 1500);
                     showToast('✅ File downloaded successfully!');
                     return;
                 }
                 
-                // For cloud URLs (http/https)
                 if (url.startsWith('http')) {
                     progressBar.style.width = '20%';
                     progressText.textContent = '20%';
-                    
-                    // Open in new tab for cloud files
                     window.open(url, '_blank');
-                    
                     progressBar.style.width = '100%';
                     progressText.textContent = '100%';
-                    
-                    setTimeout(() => {
-                        progressDiv.style.display = 'none';
-                    }, 1500);
-                    
+                    setTimeout(() => { progressDiv.style.display = 'none'; }, 1500);
                     showToast('✅ File opened in new tab!');
                     return;
                 }
@@ -873,7 +869,7 @@
         }
 
         // ============================================================
-        //  VIEW SHARED FILES - COMPLETELY FIXED
+        //  VIEW SHARED FILES
         // ============================================================
         async function viewSharedFiles() {
             const mobile = document.getElementById('viewMobile').value.trim();
@@ -909,13 +905,10 @@
                         const isImage = f.type && f.type.startsWith('image/');
                         const sizeKB = (f.size / 1024).toFixed(1);
                         const displayName = f.name || 'file';
-                        
-                        // Check if it's a data URL or http URL
                         const isDataUrl = cleanSrc.startsWith('data:');
                         const isCloudUrl = cleanSrc.startsWith('http');
                         
                         if (isImage && (isDataUrl || isCloudUrl)) {
-                            // For images: show thumbnail + download button
                             return `
                                 <div class="file-card">
                                     <img src="${cleanSrc}" alt="${displayName}" 
@@ -928,7 +921,6 @@
                                 </div>
                             `;
                         } else if (isCloudUrl) {
-                            // For cloud files: download link
                             const icon = displayName.endsWith('.pdf') ? '📄' : '📎';
                             return `
                                 <div class="file-card">
@@ -939,7 +931,6 @@
                                 </div>
                             `;
                         } else if (isDataUrl) {
-                            // For data URLs: direct download
                             const icon = displayName.endsWith('.pdf') ? '📄' : '📎';
                             return `
                                 <div class="file-card">
@@ -991,16 +982,12 @@
             }
         }
 
-        // Allow Enter key to trigger view
         document.getElementById('viewMobile').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 viewSharedFiles();
             }
         });
 
-        // ============================================================
-        //  CLOSE LIGHTBOX
-        // ============================================================
         function closeLightbox() {
             document.getElementById('lightbox').classList.remove('active');
         }
