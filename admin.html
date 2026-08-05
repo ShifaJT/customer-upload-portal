@@ -306,6 +306,7 @@
         }
         .badge-pending { background: #fefcbf; color: #975a16; }
         .badge-viewed { background: #c6f6d5; color: #22543d; }
+        .badge-location { background: #bee3f8; color: #2b6cb0; }
         
         .action-buttons {
             display: flex;
@@ -1038,6 +1039,7 @@
                     <body><table>
                         <tr>
                             <th>#</th><th>Type</th><th>Mobile</th><th>Date</th>
+                            <th>Location</th>
                             <th>Files</th><th>URLs</th><th>Message</th><th>Status</th>
                         </tr>
                 `;
@@ -1046,6 +1048,17 @@
                     const type = upload.type === 'admin_share' ? 'Admin Shared' : 'Customer Upload';
                     const mobile = upload.mobile || '';
                     const date = upload.timestamp ? new Date(upload.timestamp).toLocaleString() : '';
+                    
+                    // Location in Excel
+                    let locationText = 'Not shared';
+                    if (upload.location) {
+                        if (upload.location.lat && upload.location.lng) {
+                            locationText = `${upload.location.lat.toFixed(4)}, ${upload.location.lng.toFixed(4)}`;
+                        } else if (upload.location.latitude && upload.location.longitude) {
+                            locationText = `${upload.location.latitude.toFixed(4)}, ${upload.location.longitude.toFixed(4)}`;
+                        }
+                    }
+                    
                     let fileNames = [], fileUrls = [];
                     upload.files.forEach((file) => {
                         fileNames.push(file.name || 'Unnamed');
@@ -1065,6 +1078,7 @@
                             <td>${type}</td>
                             <td>${mobile}</td>
                             <td>${date}</td>
+                            <td>${locationText}</td>
                             <td>${fileNames.join('; ')}</td>
                             <td><a href="${fileUrls.join('; ')}" target="_blank">${fileUrls.join('; ')}</a></td>
                             <td>${message}</td>
@@ -1090,7 +1104,7 @@
         }
 
         // ============================================================
-        //  RENDER ADMIN VIEW
+        //  📋 RENDER ADMIN VIEW - FIXED WITH LOCATION!
         // ============================================================
         function renderAdminView() {
             const filterMobile = document.getElementById('filterMobile').value.trim().toLowerCase();
@@ -1128,33 +1142,52 @@
                 const typeLabel = isAdminShare ? 'Admin Shared' : 'Customer Upload';
                 const typeClass = isAdminShare ? 'admin' : 'customer';
 
-                const filesHtml = u.files.map((f) => {
-                    const isImage = f.type && f.type.startsWith('image/');
-                    const imageSrc = f.url || f.data || '';
-                    const cleanSrc = imageSrc.replace(/;\s*$/, '').trim();
-                    
-                    if (isImage && cleanSrc) {
-                        return `
-                            <div class="file-preview" onclick="openLightbox('${cleanSrc}')">
-                                <img src="${cleanSrc}" alt="${f.name}" 
-                                     onerror="this.parentElement.innerHTML='<div class=\\'file-icon\\'>🖼️</div><div class=\\'file-name\\'>${f.name}</div><div class=\\'file-size\\'>Image not found</div>'" />
-                                <div class="file-name">${f.name}</div>
-                                <div class="file-size">${(f.size/1024).toFixed(1)} KB</div>
-                                ${f.cloud ? '<div class="cloud-badge">☁️</div>' : ''}
-                                <a href="${cleanSrc}" download="${f.name}" class="download-icon">⬇️</a>
-                            </div>
-                        `;
-                    } else {
-                        const icon = f.name && f.name.endsWith('.pdf') ? '📄' : '📝';
-                        return `
-                            <div class="file-preview" onclick="window.open('${cleanSrc}', '_blank')">
-                                <div class="file-icon">${icon}</div>
-                                <div class="file-name">${f.name || 'File'}</div>
-                                <div class="file-size">${(f.size/1024).toFixed(1)} KB</div>
-                            </div>
-                        `;
+                // ---- ✅ FIX: Location display ----
+                let locationHtml = '📍 Not shared';
+                if (u.location) {
+                    if (u.location.lat !== undefined && u.location.lng !== undefined) {
+                        locationHtml = `📍 ${Number(u.location.lat).toFixed(4)}, ${Number(u.location.lng).toFixed(4)}`;
+                    } else if (u.location.latitude !== undefined && u.location.longitude !== undefined) {
+                        locationHtml = `📍 ${Number(u.location.latitude).toFixed(4)}, ${Number(u.location.longitude).toFixed(4)}`;
                     }
-                }).join('');
+                }
+                
+                // Check if location was explicitly shared
+                const isLocationOnly = u.type === 'customer_upload' && 
+                                       u.files && u.files.length === 0 && 
+                                       (u.has_location || u.location);
+
+                // ---- Files display ----
+                let filesHtml = '';
+                if (u.files && u.files.length > 0) {
+                    filesHtml = u.files.map((f) => {
+                        const isImage = f.type && f.type.startsWith('image/');
+                        const imageSrc = f.url || f.data || '';
+                        const cleanSrc = imageSrc.replace(/;\s*$/, '').trim();
+                        
+                        if (isImage && cleanSrc) {
+                            return `
+                                <div class="file-preview" onclick="openLightbox('${cleanSrc}')">
+                                    <img src="${cleanSrc}" alt="${f.name}" 
+                                         onerror="this.parentElement.innerHTML='<div class=\\'file-icon\\'>🖼️</div><div class=\\'file-name\\'>${f.name}</div><div class=\\'file-size\\'>Image not found</div>'" />
+                                    <div class="file-name">${f.name}</div>
+                                    <div class="file-size">${(f.size/1024).toFixed(1)} KB</div>
+                                    ${f.cloud ? '<div class="cloud-badge">☁️</div>' : ''}
+                                    <a href="${cleanSrc}" download="${f.name}" class="download-icon">⬇️</a>
+                                </div>
+                            `;
+                        } else {
+                            const icon = f.name && f.name.endsWith('.pdf') ? '📄' : '📝';
+                            return `
+                                <div class="file-preview" onclick="window.open('${cleanSrc}', '_blank')">
+                                    <div class="file-icon">${icon}</div>
+                                    <div class="file-name">${f.name || 'File'}</div>
+                                    <div class="file-size">${(f.size/1024).toFixed(1)} KB</div>
+                                </div>
+                            `;
+                        }
+                    }).join('');
+                }
 
                 const messageHtml = u.message ? `
                     <div class="message-box">💬 ${u.message}</div>
@@ -1163,6 +1196,10 @@
                 const badgeClass = u.viewed ? 'badge-viewed' : 'badge-pending';
                 const badgeText = u.viewed ? '✅ Viewed' : '⏳ Pending';
 
+                // Location only badge
+                const locationBadge = isLocationOnly ? 
+                    `<span class="badge badge-location">📍 Location Only</span>` : '';
+
                 return `
                     <div class="upload-item">
                         <div class="meta">
@@ -1170,9 +1207,14 @@
                             <span class="type-badge ${typeClass}">${typeLabel}</span>
                             <span class="time">${u.timestamp ? new Date(u.timestamp).toLocaleString() : 'No date'}</span>
                             <span class="badge ${badgeClass}">${badgeText}</span>
+                            ${locationBadge}
+                        </div>
+                        <div style="font-size:14px; color:#4a5568; margin:4px 0;">
+                            ${locationHtml}
                         </div>
                         ${messageHtml}
                         <div class="files">${filesHtml}</div>
+                        ${isLocationOnly ? '<div style="font-size:13px; color:#718096; font-style:italic; margin:4px 0;">📍 Customer shared location only (no files)</div>' : ''}
                         <div class="action-buttons">
                             ${!u.viewed ? `<button class="btn btn-success" onclick="markViewed('${u.id}')">✅ Mark as Viewed</button>` : ''}
                             <button class="btn btn-danger" onclick="deleteUpload('${u.id}')">🗑️ Delete</button>
