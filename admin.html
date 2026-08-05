@@ -222,6 +222,15 @@
             color: #718096;
             font-size: 13px;
         }
+        .upload-item .location-display {
+            font-size: 14px;
+            color: #2b6cb0;
+            background: #ebf8ff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            margin: 4px 0;
+            display: inline-block;
+        }
         .upload-item .files {
             display: flex;
             flex-wrap: wrap;
@@ -914,16 +923,14 @@
         }
 
         // ============================================================
-        //  📸 DOWNLOAD ALL IMAGES - FIXED VERSION!
+        //  📸 DOWNLOAD ALL IMAGES
         // ============================================================
         async function downloadAllImages() {
-            // Get all image URLs
             const imageUrls = [];
             allUploads.forEach(upload => {
                 upload.files.forEach(file => {
                     if (file.url && file.type && file.type.startsWith('image/')) {
                         let cleanUrl = file.url.replace(/;\s*$/, '').trim();
-                        // Only add if it's a valid URL (not local data)
                         if (cleanUrl.startsWith('http')) {
                             imageUrls.push({ url: cleanUrl, name: file.name || 'image.jpg' });
                         }
@@ -936,7 +943,6 @@
                 return;
             }
 
-            // Show progress
             const progressDiv = document.getElementById('downloadProgress');
             const progressBar = document.getElementById('progressBar');
             const progressText = document.getElementById('progressText');
@@ -952,14 +958,11 @@
                 for (let i = 0; i < imageUrls.length; i++) {
                     const item = imageUrls[i];
                     try {
-                        // Fetch the image as blob
                         const response = await fetch(item.url);
                         if (!response.ok) throw new Error('Failed to fetch');
                         const blob = await response.blob();
                         
-                        // Create a file name with proper extension
                         let fileName = item.name;
-                        // If no extension, add one based on content type
                         if (!fileName.includes('.')) {
                             const ext = blob.type.split('/')[1] || 'jpg';
                             fileName = fileName + '.' + ext;
@@ -985,23 +988,18 @@
                     return;
                 }
 
-                // Create ZIP using JSZip
                 const zip = new JSZip();
                 images.forEach(img => {
                     zip.file(img.name, img.blob);
                 });
 
                 const zipBlob = await zip.generateAsync({ type: 'blob' });
-                
-                // Download ZIP
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(zipBlob);
                 link.download = `images_${new Date().toISOString().slice(0,10)}.zip`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                
-                // Clean up
                 setTimeout(() => URL.revokeObjectURL(link.href), 5000);
 
                 showToast(`📸 Downloaded ${images.length} images as ZIP!`);
@@ -1049,13 +1047,12 @@
                     const mobile = upload.mobile || '';
                     const date = upload.timestamp ? new Date(upload.timestamp).toLocaleString() : '';
                     
-                    // Location in Excel
                     let locationText = 'Not shared';
                     if (upload.location) {
-                        if (upload.location.lat && upload.location.lng) {
-                            locationText = `${upload.location.lat.toFixed(4)}, ${upload.location.lng.toFixed(4)}`;
-                        } else if (upload.location.latitude && upload.location.longitude) {
-                            locationText = `${upload.location.latitude.toFixed(4)}, ${upload.location.longitude.toFixed(4)}`;
+                        if (upload.location.lat !== undefined && upload.location.lng !== undefined) {
+                            locationText = `${Number(upload.location.lat).toFixed(4)}, ${Number(upload.location.lng).toFixed(4)}`;
+                        } else if (upload.location.latitude !== undefined && upload.location.longitude !== undefined) {
+                            locationText = `${Number(upload.location.latitude).toFixed(4)}, ${Number(upload.location.longitude).toFixed(4)}`;
                         }
                     }
                     
@@ -1104,7 +1101,7 @@
         }
 
         // ============================================================
-        //  📋 RENDER ADMIN VIEW - FIXED WITH LOCATION!
+        //  📋 RENDER ADMIN VIEW - FIXED LOCATION DISPLAY!
         // ============================================================
         function renderAdminView() {
             const filterMobile = document.getElementById('filterMobile').value.trim().toLowerCase();
@@ -1142,22 +1139,40 @@
                 const typeLabel = isAdminShare ? 'Admin Shared' : 'Customer Upload';
                 const typeClass = isAdminShare ? 'admin' : 'customer';
 
-                // ---- ✅ FIX: Location display ----
-                let locationHtml = '📍 Not shared';
+                // ============================================================
+                //  ✅ FIX: Location display - properly check and show location
+                // ============================================================
+                let locationHtml = '';
+                let hasLocation = false;
+                
+                // Check if location exists in the upload object
                 if (u.location) {
+                    // Check for different location formats
                     if (u.location.lat !== undefined && u.location.lng !== undefined) {
                         locationHtml = `📍 ${Number(u.location.lat).toFixed(4)}, ${Number(u.location.lng).toFixed(4)}`;
+                        hasLocation = true;
                     } else if (u.location.latitude !== undefined && u.location.longitude !== undefined) {
                         locationHtml = `📍 ${Number(u.location.latitude).toFixed(4)}, ${Number(u.location.longitude).toFixed(4)}`;
+                        hasLocation = true;
+                    } else if (typeof u.location === 'string') {
+                        // If location is stored as string
+                        locationHtml = `📍 ${u.location}`;
+                        hasLocation = true;
+                    } else if (Array.isArray(u.location) && u.location.length === 2) {
+                        // If location is stored as array [lat, lng]
+                        locationHtml = `📍 ${Number(u.location[0]).toFixed(4)}, ${Number(u.location[1]).toFixed(4)}`;
+                        hasLocation = true;
                     }
                 }
-                
-                // Check if location was explicitly shared
+
+                // Also check if location was explicitly flagged as shared
                 const isLocationOnly = u.type === 'customer_upload' && 
                                        u.files && u.files.length === 0 && 
-                                       (u.has_location || u.location);
+                                       (u.has_location || hasLocation);
 
-                // ---- Files display ----
+                // ============================================================
+                //  FILES DISPLAY
+                // ============================================================
                 let filesHtml = '';
                 if (u.files && u.files.length > 0) {
                     filesHtml = u.files.map((f) => {
@@ -1196,9 +1211,14 @@
                 const badgeClass = u.viewed ? 'badge-viewed' : 'badge-pending';
                 const badgeText = u.viewed ? '✅ Viewed' : '⏳ Pending';
 
-                // Location only badge
+                // Location badge
                 const locationBadge = isLocationOnly ? 
                     `<span class="badge badge-location">📍 Location Only</span>` : '';
+
+                // Location display
+                const locationDisplayHtml = hasLocation ? `
+                    <div class="location-display">${locationHtml}</div>
+                ` : '';
 
                 return `
                     <div class="upload-item">
@@ -1209,9 +1229,7 @@
                             <span class="badge ${badgeClass}">${badgeText}</span>
                             ${locationBadge}
                         </div>
-                        <div style="font-size:14px; color:#4a5568; margin:4px 0;">
-                            ${locationHtml}
-                        </div>
+                        ${locationDisplayHtml}
                         ${messageHtml}
                         <div class="files">${filesHtml}</div>
                         ${isLocationOnly ? '<div style="font-size:13px; color:#718096; font-style:italic; margin:4px 0;">📍 Customer shared location only (no files)</div>' : ''}
